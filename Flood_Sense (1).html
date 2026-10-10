@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flood Sense: flood early-warning and evacuation guide</title>
+<meta name="description" content="Floods give hours of warning if you can read the signs. Learn how water is predicted, what to do at each stage, and how to get out in time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Bricolage+Grotesque:wght@600;700;800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1F7F9; --surface:#FFFFFF; --ink:#0B2230; --muted:#476272; --line:#D2E0E6;
+  --water:#0C7A99; --water-ink:#FFFFFF; --sky:#D7ECF3; --ground:#7F9468; --road:#44505A;
+  --cloud:#FFFFFF; --staff:#F6F8F8; --staff-ink:#10222D;
+  --stage:#E3B02A; --stage-ink:#10222D;
+  --display:"Barlow Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --body:"Public Sans","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#07151D; --surface:#0F2630; --ink:#E6F1F4; --muted:#9DB6C1; --line:#1F3F4C;
+    --water:#52BEE0; --water-ink:#062029; --sky:#123747; --ground:#46563F; --road:#2A3338;
+    --cloud:#2E5565; --staff:#E9EFF0; --staff-ink:#10222D;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#07151D; --surface:#0F2630; --ink:#E6F1F4; --muted:#9DB6C1; --line:#1F3F4C;
+  --water:#52BEE0; --water-ink:#062029; --sky:#123747; --ground:#46563F; --road:#2A3338;
+  --cloud:#2E5565; --staff:#E9EFF0; --staff-ink:#10222D;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font:400 1.0625rem/1.65 var(--body);
+  -webkit-text-size-adjust:100%;
+}
+a{color:var(--water);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--water);outline-offset:3px;border-radius:3px}
+.wrap{width:min(1080px,100% - 2.5rem);margin-inline:auto}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Header */
+.site-head{display:flex;flex-wrap:wrap;gap:.75rem 2rem;align-items:center;justify-content:space-between;padding-block:1.25rem}
+.brand{display:flex;align-items:center;gap:.6rem;font:700 1.6rem/1 var(--display);letter-spacing:.01em;color:var(--ink);text-decoration:none}
+.brand svg{width:34px;height:34px;flex:none}
+.site-head nav{display:flex;flex-wrap:wrap;gap:.25rem 1.4rem;font-weight:500;font-size:.98rem}
+.site-head nav a{color:var(--ink);text-decoration:none;padding:.25rem 0;border-bottom:2px solid transparent}
+.site-head nav a:hover{border-color:var(--water)}
+
+/* Hero */
+.hero{padding-block:2rem 1rem}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1;margin:0;letter-spacing:.005em}
+h1{font-size:clamp(3rem,9.5vw,7rem);max-width:12ch;letter-spacing:-.005em}
+.lede{font-size:clamp(1.15rem,2.2vw,1.4rem);line-height:1.5;max-width:44ch;margin:1.25rem 0 0;color:var(--muted)}
+.scene{margin:2rem 0 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--sky)}
+.scene svg{display:block;width:100%;height:auto}
+.sky{fill:var(--sky)}
+.cloud{fill:var(--cloud)}
+.rain{stroke:var(--water);stroke-width:2.5;stroke-linecap:round}
+.rain line{opacity:0;animation:fall 10s linear infinite}
+.rain line:nth-child(2n){animation-delay:-3.3s}
+.rain line:nth-child(3n){animation-delay:-5.8s}
+.rain line:nth-child(5n){animation-delay:-1.7s}
+@keyframes fall{0%{transform:translate(0,0);opacity:0}15%{opacity:.8}80%{opacity:.8}100%{transform:translate(-26px,115px);opacity:0}}
+.ground{fill:var(--ground)}
+.road{fill:var(--road)}
+.house-body{fill:var(--staff)}
+.house-roof{fill:var(--muted)}
+.house-door{fill:var(--road)}
+.svgt{font:500 13px var(--body);fill:var(--muted)}
+.svgt-strong{font:600 13px var(--body);fill:var(--ink)}
+.staff-body{fill:var(--staff);stroke:var(--staff-ink);stroke-width:1}
+.staff-tick{stroke:var(--staff-ink);stroke-width:2}
+.staff-road{stroke:#C23B2E;stroke-width:3}
+.water-body{fill:var(--water);opacity:.82}
+.wave{fill:var(--water);opacity:.82;animation:drift 3.2s linear infinite}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-60px)}}
+#waterG{transition:transform .6s ease}
+.route{fill:none;stroke:#C23B2E;stroke-width:3.5;stroke-dasharray:9 7;stroke-linecap:round;opacity:0;transition:opacity .4s}
+.route-label{opacity:0;transition:opacity .4s}
+.show-route .route,.show-route .route-label{opacity:1}
+
+/* Controls */
+.control{margin-top:1.5rem;display:grid;gap:.9rem}
+.control label{font:600 1.05rem/1.3 var(--body)}
+.slider-row{display:flex;align-items:center;gap:1rem}
+.slider-row span{font:600 1rem var(--body);min-width:3.2rem;color:var(--muted)}
+.slider-row span:last-child{text-align:right}
+input[type=range]{flex:1;width:100%;height:2.5rem;accent-color:var(--water);cursor:pointer;margin:0}
+.btn-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.btn-row .sep{color:var(--muted);font-size:.95rem;margin-right:.2rem}
+button,.btn{
+  font:600 .98rem/1 var(--body);color:var(--ink);background:var(--surface);
+  border:1.5px solid var(--ink);border-radius:999px;padding:.7rem 1.1rem;cursor:pointer;min-height:44px;
+}
+button:hover{background:var(--ink);color:var(--bg)}
+button.primary{background:var(--water);border-color:var(--water);color:var(--water-ink)}
+button.primary:hover{filter:brightness(1.08);background:var(--water);color:var(--water-ink)}
+
+/* Stage console */
+.console{
+  margin-top:1.5rem;display:grid;grid-template-columns:minmax(220px,.8fr) 1.6fr;gap:2rem;
+  background:var(--surface);border:1px solid var(--line);border-left:10px solid var(--stage);
+  border-radius:6px;padding:1.75rem 1.75rem 1.75rem 1.5rem;
+}
+.console[data-stage="watch"]{--stage:#E3B02A;--stage-ink:#10222D}
+.console[data-stage="warning"]{--stage:#B84A0E;--stage-ink:#FFFFFF}
+.console[data-stage="evacuate"]{--stage:#B3261E;--stage-ink:#FFFFFF}
+.console[data-stage="flood"]{--stage:#5B1A4A;--stage-ink:#FFFFFF}
+.console[data-stage="clear"]{--stage:#1F6B45;--stage-ink:#FFFFFF}
+.console[data-stage="recede"]{--stage:#1B6B8A;--stage-ink:#FFFFFF}
+.hours{font:700 clamp(3.5rem,9vw,5.5rem)/.9 var(--display);margin:0}
+.pill{display:inline-block;margin:.9rem 0 .6rem;padding:.35rem .8rem;border-radius:4px;background:var(--stage);color:var(--stage-ink);font:700 1.35rem/1.1 var(--display);letter-spacing:.02em}
+.stage-lead{margin:0;color:var(--muted);max-width:30ch}
+.console h3{font-size:1.5rem;margin-bottom:.6rem}
+.console ul{margin:0;padding:0;list-style:none;display:grid;gap:.65rem}
+.console li{padding-left:1.4rem;position:relative}
+.console li::before{content:"";position:absolute;left:0;top:.62em;width:.6rem;height:.6rem;background:var(--stage);border-radius:50%}
+.console li strong{font-weight:600}
+
+/* Sections */
+section{padding-block:clamp(3rem,7vw,5.5rem)}
+.band{background:var(--surface)}
+h2{font-size:clamp(2.2rem,5.5vw,3.6rem);max-width:18ch}
+.intro{max-width:56ch;margin:1rem 0 0;color:var(--muted)}
+.signs{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:2.5rem}
+.signs div{border-left:4px solid var(--water);padding-left:1.1rem}
+.signs h3{font-size:1.6rem;margin-bottom:.5rem}
+.signs ul{margin:0;padding-left:1.1rem;display:grid;gap:.5rem}
+.flash{margin-top:2.5rem;padding:1.25rem 1.5rem;border-left:10px solid #B3261E;background:var(--surface);border-radius:4px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.flash h3{font-size:1.6rem;margin-bottom:.35rem}
+.flash p{margin:0;max-width:70ch}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-top:2.5rem;align-items:start}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:420px}
+th,td{text-align:left;vertical-align:top;padding:.8rem .9rem;border-bottom:1px solid var(--line)}
+th{font:700 1.3rem/1.1 var(--display);width:7.5rem}
+.list-plain{margin:0;padding-left:1.1rem;display:grid;gap:.55rem}
+
+/* Automatic monitor */
+.monitor{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:1rem 2rem;align-items:center;padding:1rem 1.25rem;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.mon-live{display:flex;align-items:center;gap:.6rem;font-weight:600;margin:0}
+.dot{width:12px;height:12px;border-radius:50%;background:#1F6B45;animation:pulse 1.8s infinite}
+.monitor.paused .dot{background:var(--muted);animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(31,107,69,.55)}70%{box-shadow:0 0 0 10px rgba(31,107,69,0)}100%{box-shadow:0 0 0 0 rgba(31,107,69,0)}}
+.mon-grid{display:flex;flex-wrap:wrap;gap:.6rem 2rem;margin:0;flex:1}
+.mon-grid div{min-width:7.5rem}
+.mon-grid dt{font-size:.85rem;color:var(--muted)}
+.mon-grid dd{margin:0;font:700 1.5rem/1.1 var(--display)}
+.mon-note{flex-basis:100%;margin:0;font-size:.92rem;color:var(--muted);max-width:80ch}
+.pipe{list-style:none;margin:2.5rem 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));counter-reset:s}
+.pipe li{position:relative;padding-right:1.2rem}
+.pipe li::before{content:counter(s);counter-increment:s;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--water);color:var(--water-ink);font:700 1.1rem var(--display)}
+.pipe li::after{content:"";position:absolute;top:17px;left:44px;right:8px;height:2px;background:var(--line)}
+.pipe li:last-child::after{display:none}
+.pipe h3{font-size:1.35rem;margin:.9rem 0 .35rem}
+.pipe .pv{font:700 1.5rem/1.1 var(--display);margin:0 0 .35rem}
+.pipe .pn{margin:0;font-size:.92rem;color:var(--muted)}
+@media (max-width:860px){.pipe{grid-template-columns:1fr;gap:1.6rem}.pipe li::after{display:none}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+
+/* Graphics */
+.ico{width:28px;height:28px;flex:none;color:var(--water);stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.strip .ico{width:24px;height:24px}
+.ledger h3,.out h3{display:flex;align-items:center;gap:.65rem}
+.out h3 .ico{width:36px;height:36px}
+.ledger h3 .ico{width:30px;height:30px}
+.wave{line-height:0}
+.wave svg{display:block;width:100%;height:clamp(26px,4.5vw,56px)}
+.wave.bg-to-surface{background:var(--bg)}
+.wave.bg-to-surface path{fill:var(--surface)}
+.wave.surface-to-bg{background:var(--surface)}
+.wave.surface-to-bg path{fill:var(--bg)}
+.map-block{margin-top:2.5rem}
+.map-block h3{font-size:2.1rem;margin-bottom:.8rem}
+.map{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.map-river{fill:none;stroke:var(--water);stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.mz-name{font:700 19px var(--display);fill:var(--ink)}
+.mz-sub{font:600 12.5px var(--body);fill:var(--ink)}
+.mz-pop{font:500 12px var(--body);fill:var(--muted)}
+.mz-x{font:700 17px var(--body);fill:#fff}
+.route-go{fill:none;stroke:#1F6B45;stroke-width:4.5;stroke-linecap:round;stroke-dasharray:10 8;animation:flow .9s linear infinite}
+.route-idle{fill:none;stroke:var(--muted);stroke-width:3;stroke-linecap:round;stroke-dasharray:2 8}
+.route-cut{fill:none;stroke:#B3261E;stroke-width:4;stroke-linecap:round;stroke-dasharray:7 6}
+@keyframes flow{to{stroke-dashoffset:-18}}
+.bridge{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+.bridge.cut-b{stroke:#B3261E}
+.map-legend .st{margin:0 .35rem .35rem 0}
+.route-map{margin-bottom:2rem}
+.rm-title{font:700 1.7rem/1.1 var(--display);margin:0 0 .6rem}
+.rm-n{font:700 13px var(--body);fill:var(--bg)}
+.rm-now{font-weight:600;margin:.8rem 0 0;max-width:70ch}
+.route-steps{margin:.8rem 0 0;padding-left:1.25rem;display:grid;gap:.35rem;max-width:70ch}
+.ring{width:clamp(170px,26vw,230px);margin:.2rem 0 1rem}
+.ring svg{display:block;width:100%;height:auto}
+.ring-bg{fill:none;stroke:var(--line);stroke-width:16}
+.ring-fg{fill:none;stroke:#1F6B45;stroke-width:16;stroke-linecap:round;stroke-dasharray:414.7 414.7;stroke-dashoffset:0;transition:stroke-dashoffset .5s,stroke .5s}
+.ring text{font:700 46px var(--display);fill:var(--ink)}
+@media (prefers-reduced-motion:reduce){.route-go{animation:none}.ring-fg{transition:none}}
+@media print{.wave,.map-block{display:none !important}}
+
+/* Outputs */
+.strip{list-style:none;margin:2.5rem 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:4px solid var(--ink)}
+.strip li{padding:1.1rem 1rem 1.3rem 0;margin-right:1rem;border-right:1px solid var(--line)}
+.strip li:last-child{border-right:0;margin-right:0}
+.strip a{display:block;color:inherit;text-decoration:none}
+.strip .k{display:flex;align-items:center;gap:.5rem;font:600 .98rem/1.3 var(--body);color:var(--muted)}
+.strip .v{display:block;font:700 clamp(1.7rem,3vw,2.5rem)/1.05 var(--display);margin:.4rem 0 .3rem}
+.strip .s{display:block;font-size:.9rem;line-height:1.4;color:var(--muted)}
+.strip a:hover .v{color:var(--water)}
+.strip + .out{margin-top:2.5rem}
+.out{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.5fr);gap:1.5rem 3rem;padding-block:2.75rem;border-top:1px solid var(--line);align-items:start;scroll-margin-top:1rem}
+.out h3{font-size:2.1rem;margin-bottom:.6rem}
+.out .what{margin:0 0 1rem;color:var(--muted);max-width:42ch}
+.out .now{margin:0;font-weight:600;max-width:42ch}
+.chart{display:block;width:100%;height:auto}
+.legend{font-size:.92rem;color:var(--muted);margin:.6rem 0 0;max-width:70ch}
+.ch-grid{stroke:var(--line);stroke-width:1}
+.ch-t{font:500 12px var(--body);fill:var(--muted)}
+.ch-t-strong{font:600 13px var(--body);fill:var(--ink)}
+.ch-zone{stroke:var(--muted);stroke-width:1;stroke-dasharray:4 4;opacity:.8}
+.ch-line{stroke:var(--water);stroke-width:3.5;fill:none;stroke-linejoin:round}
+.ch-fc{stroke:var(--water);stroke-width:3;fill:none;stroke-dasharray:8 6}
+.ch-band{fill:var(--water);opacity:.2}
+.ch-dot{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+.ch-dot-on{fill:#5B1A4A;stroke:#5B1A4A;stroke-width:2}
+.ch-mark{fill:var(--ink)}
+.ch-vline{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:3 4}
+.ch-flood-tag{font:700 12px var(--body);fill:#fff}
+.zbar{stroke:var(--line);stroke-width:1.5}
+.tier-severe{fill:#5B1A4A}
+.tier-high{fill:#B3261E}
+.tier-moderate{fill:#B84A0E}
+.tier-low{fill:#1F6B45}
+.risk-water{fill:var(--water);opacity:.45}
+.risk-line{stroke:var(--water);stroke-width:3}
+.rt{min-width:700px}
+.rt thead th{font:600 .9rem/1.2 var(--body);color:var(--muted);width:auto;border-bottom:2px solid var(--ink);white-space:nowrap}
+.rt tbody th{width:9rem}
+.shelter{display:grid;gap:.4rem;padding:1rem 0;border-bottom:1px solid var(--line)}
+.shelter:first-child{padding-top:0}
+.shelter .row{display:flex;justify-content:space-between;gap:.5rem 1rem;flex-wrap:wrap;font-weight:600}
+.cap{position:relative;height:18px;background:var(--bg);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.cap-assigned{position:absolute;left:0;top:0;bottom:0;background:var(--water);opacity:.35}
+.cap-moving{position:absolute;left:0;top:0;bottom:0;background:var(--water)}
+.shelter small{color:var(--muted);font-size:.93rem}
+.score-big{font:700 clamp(4.5rem,13vw,8rem)/.9 var(--display);margin:.2rem 0 1rem}
+.detail{margin-top:2.5rem}
+.detail summary{cursor:pointer;font-weight:600;padding:.5rem 0}
+@media (max-width:980px){
+  .strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .strip li:nth-child(2n){border-right:0;margin-right:0}
+  .strip li{border-bottom:1px solid var(--line)}
+}
+@media (max-width:860px){.out{grid-template-columns:1fr}}
+@media (max-width:520px){
+  .strip{grid-template-columns:1fr}
+  .strip li{border-right:0;margin-right:0}
+}
+
+/* Inputs */
+.ledger{list-style:none;margin:2.5rem 0 0;padding:0;border-top:1px solid var(--line)}
+.ledger li{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:.6rem 2.5rem;padding:1.2rem 0;border-bottom:1px solid var(--line);align-items:baseline}
+.ledger h3{font-size:1.7rem;margin:0 0 .25rem}
+.ledger p{margin:0;color:var(--muted);max-width:50ch}
+.ledger .val{font:700 clamp(1.6rem,3.4vw,2.3rem)/1.1 var(--display);margin:0;color:var(--ink)}
+.ledger .val small{display:block;font:400 .93rem/1.45 var(--body);color:var(--muted);margin-top:.3rem;max-width:44ch}
+.zone-summary{margin:3rem 0 1rem;font:700 clamp(1.6rem,3.8vw,2.4rem)/1.15 var(--display);max-width:32ch}
+.zones{min-width:880px}
+.zones thead th{font:600 .9rem/1.2 var(--body);color:var(--muted);width:auto;border-bottom:2px solid var(--ink);white-space:nowrap}
+.zones tbody th{width:10rem}
+.st{display:inline-block;padding:.25rem .65rem;border-radius:4px;font:600 .9rem/1.3 var(--body);white-space:nowrap}
+.st[data-s="safe"]{background:#1F6B45;color:#fff}
+.st[data-s="watch"]{background:#E3B02A;color:#10222D}
+.st[data-s="ready"]{background:#B84A0E;color:#fff}
+.st[data-s="leave"]{background:#B3261E;color:#fff}
+.st[data-s="flooded"]{background:#5B1A4A;color:#fff}
+.cut{color:#B3261E;font-weight:600}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cut{color:#FF8A80}}
+:root[data-theme="dark"] .cut{color:#FF8A80}
+.feed-title{font-size:1.9rem;margin:3rem 0 .8rem}
+.feed{list-style:none;margin:0;padding:0;display:grid;gap:.7rem;max-width:70ch}
+.feed li{border-left:4px solid var(--water);padding-left:1rem}
+.feed strong{font-weight:600;margin-right:.4rem}
+.sample-note{font-size:.95rem;color:var(--muted);margin:.8rem 0 0;max-width:70ch}
+@media (max-width:860px){.ledger li{grid-template-columns:1fr}}
+
+/* Calculator */
+.calc{margin-top:2.5rem;display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:1.25rem;align-items:end;max-width:880px}
+.field{display:grid;gap:.4rem}
+.field label{font-weight:600;font-size:.98rem}
+input[type=text],input[type=number],textarea{
+  width:100%;font:400 1rem/1.4 var(--body);color:var(--ink);background:var(--bg);
+  border:1.5px solid var(--line);border-radius:6px;padding:.7rem .8rem;min-height:44px;
+}
+textarea{resize:vertical;min-height:5.5rem}
+input:focus-visible,textarea:focus-visible{border-color:var(--water)}
+.result{font:700 clamp(2.2rem,5vw,3.2rem)/1 var(--display);margin:0}
+.result small{display:block;font:400 .95rem/1.4 var(--body);color:var(--muted);margin-top:.3rem}
+
+/* Depth ruler */
+.depths{display:flex;align-items:flex-end;gap:clamp(1rem,4vw,3rem);margin-top:2.5rem;min-height:260px}
+.depth{display:flex;flex-direction:column;align-items:flex-start;gap:.6rem;flex:1;max-width:260px}
+.depth .bar{width:100%;background:var(--water);border-radius:4px 4px 0 0;opacity:.9}
+.depth b{font:700 2.4rem/1 var(--display)}
+.depth span{font-size:.98rem;color:var(--muted)}
+
+/* Plan */
+.plan{display:grid;grid-template-columns:1.1fr .9fr;gap:3rem;margin-top:2.5rem;align-items:start}
+.fields{display:grid;gap:1.1rem}
+.bag{list-style:none;margin:0;padding:0;display:grid;gap:.4rem}
+.bag label{display:flex;gap:.8rem;align-items:flex-start;padding:.55rem .2rem;cursor:pointer}
+.bag input{width:1.35rem;height:1.35rem;margin-top:.2rem;flex:none;accent-color:var(--water)}
+.note{font-size:.95rem;color:var(--muted);margin:.8rem 0 0}
+.bag-title{font-size:1.8rem;margin-bottom:.6rem}
+
+footer{padding-block:2.5rem 3rem;border-top:0;color:var(--muted);font-size:.95rem}
+footer p{max-width:70ch;margin:.4rem 0}
+.emergency{font:700 1.6rem/1.1 var(--display);color:var(--ink)}
+
+@media (max-width:860px){
+  .console,.split,.plan{grid-template-columns:1fr;gap:1.75rem}
+  .signs{grid-template-columns:1fr;gap:1.75rem}
+  .calc{grid-template-columns:1fr 1fr}
+  .calc .out{grid-column:1/-1}
+}
+@media (max-width:520px){
+  .console{padding:1.25rem 1.1rem 1.25rem 1rem;border-left-width:8px}
+  .slider-row span{min-width:2.6rem;font-size:.9rem}
+}
+@media (prefers-reduced-motion:reduce){
+  .rain line{animation:none;opacity:.8}
+  .wave{animation:none}
+  #waterG,.route,.route-label{transition:none}
+  html{scroll-behavior:auto}
+}
+@media print{
+  .site-head,.hero,.band.no-print,#outputs,#inputs,#signs,#predict,#water,#guide,footer .no-print,.btn-row,.print-hide{display:none !important}
+  body{background:#fff;color:#000}
+  section{padding-block:1rem}
+}
+
+/* ===== Theme refresh ===== */
+:root{
+  --head:"Bricolage Grotesque","Barlow Condensed",system-ui,sans-serif;
+  --sky-top:#9CD2E6; --sky-bot:#E6F4F8;
+  --band-a:#06202D; --band-b:#0A3B52; --band-c:#116A89;
+  --shadow:0 1px 2px rgba(8,42,60,.06),0 16px 36px -16px rgba(8,42,60,.30);
+  --radius:16px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--sky-top:#0C2A39;--sky-bot:#1C4B5F;--shadow:0 1px 2px rgba(0,0,0,.4),0 16px 36px -16px rgba(0,0,0,.7)}}
+:root[data-theme="dark"]{--sky-top:#0C2A39;--sky-bot:#1C4B5F;--shadow:0 1px 2px rgba(0,0,0,.4),0 16px 36px -16px rgba(0,0,0,.7)}
+::selection{background:var(--water);color:var(--water-ink)}
+
+/* Headings */
+h1,h2,h3,.zone-summary,.rm-title{font-family:var(--head);letter-spacing:-.02em}
+h1{font-size:clamp(2.6rem,7.2vw,5.4rem);font-weight:800;line-height:1;max-width:13ch}
+h2{font-size:clamp(2rem,4.6vw,3.2rem);font-weight:800;line-height:1.05;max-width:20ch}
+.out h3,.map-block h3{font-size:1.65rem;line-height:1.1}
+.signs h3,.flash h3,.ledger h3{font-size:1.3rem;line-height:1.15}
+.console h3{font-size:1.25rem}
+.pipe h3{font-size:1.1rem;line-height:1.2}
+.feed-title{font-size:1.5rem}
+.bag-title{font-size:1.4rem}
+.rm-title{font-size:1.35rem}
+.zone-summary{font-size:clamp(1.4rem,3vw,2rem);line-height:1.2;max-width:36ch}
+
+/* Hero band */
+.top{
+  background:
+    radial-gradient(900px 420px at 88% -8%,rgba(82,190,224,.40),transparent 65%),
+    radial-gradient(700px 380px at -5% 45%,rgba(17,106,137,.50),transparent 70%),
+    linear-gradient(180deg,var(--band-a) 0%,var(--band-b) 58%,var(--band-c) 100%);
+  border-radius:0 0 44px 44px;
+  padding-bottom:3.5rem;
+}
+.top .brand{color:#fff}
+.top .brand svg path{stroke:#7FD6EE}
+.top .site-head nav a{color:rgba(255,255,255,.88)}
+.top .site-head nav a:hover{color:#fff;border-color:#7FD6EE}
+.top :focus-visible{outline-color:#9BE0F3}
+.top .monitor :focus-visible,.top .console :focus-visible{outline-color:var(--water)}
+.hero{padding-block:2.5rem 0}
+.top h1{color:#fff}
+.top .lede{color:rgba(255,255,255,.84)}
+.scene{
+  border:1px solid rgba(255,255,255,.22);border-radius:22px;background:var(--sky-bot);
+  box-shadow:0 34px 60px -26px rgba(0,0,0,.6);
+}
+.sky{fill:url(#skyG)}
+.monitor,.console{border-radius:var(--radius);box-shadow:0 26px 50px -26px rgba(0,0,0,.55)}
+.monitor{border:0}
+.console{border-top:0;border-right:0;border-bottom:0;border-left:10px solid var(--stage)}
+.pill{border-radius:999px;padding:.4rem 1.1rem}
+
+/* Controls */
+button,.btn{
+  color:var(--water);background:transparent;border-color:var(--water);
+  transition:background .15s,color .15s,box-shadow .15s;
+}
+button:hover{background:var(--water);color:var(--water-ink)}
+button.primary{box-shadow:0 10px 20px -10px var(--water)}
+input[type=text],input[type=number],textarea{border-radius:10px;background:var(--surface)}
+input:focus-visible,textarea:focus-visible{box-shadow:0 0 0 4px color-mix(in srgb,var(--water) 22%,transparent)}
+
+/* Sections and panels */
+.signs div{
+  background:var(--bg);border-left:0;border-top:4px solid var(--water);
+  border-radius:14px;padding:1.4rem 1.4rem 1.6rem;
+}
+.flash{
+  border-radius:var(--radius);
+  background:linear-gradient(90deg,rgba(179,38,30,.09),transparent 75%),var(--surface);
+}
+.map{border:0;border-radius:var(--radius);box-shadow:var(--shadow)}
+.strip{border-top:4px solid var(--water)}
+.strip a:hover .v{color:var(--water)}
+.out{border-top-color:var(--line)}
+tbody tr:nth-child(even){background:color-mix(in srgb,var(--water) 6%,transparent)}
+.st{border-radius:999px;padding:.25rem .8rem}
+.cap{border-radius:999px}
+.cap-assigned,.cap-moving{border-radius:999px}
+.depth .bar{background:linear-gradient(180deg,color-mix(in srgb,var(--water) 60%,#fff),var(--water));border-radius:10px 10px 0 0}
+.feed li,.signs{border-color:var(--water)}
+.pipe li::before{background:linear-gradient(135deg,color-mix(in srgb,var(--water) 70%,#fff),var(--water))}
+
+/* Footer */
+footer{
+  background:linear-gradient(180deg,var(--band-b),var(--band-a));
+  color:rgba(255,255,255,.78);border-radius:40px 40px 0 0;padding-block:3rem 3.5rem;
+}
+footer a{color:#8FDCF2}
+footer .emergency{color:#fff}
+footer :focus-visible{outline-color:#9BE0F3}
+@media print{
+  .top{display:none !important}
+  footer{background:none;color:#000;border-radius:0}
+  footer *{color:#000 !important}
+}
+
+/* Phone fix: let grid columns shrink */
+.out>*,.split>*,.plan>*{min-width:0}
+@media (max-width:860px){.out,.split,.plan{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-rain" viewBox="0 0 24 24"><path d="M6.5 14.5A4 4 0 0 1 7 6.6a5 5 0 0 1 9.6 1.4 3.3 3.3 0 0 1-.1 6.5z"/><path d="M8 17.5l-1 2.5M12 17.5l-1 2.5M16 17.5l-1 2.5"/></symbol>
+  <symbol id="i-terrain" viewBox="0 0 24 24"><path d="M2.5 19.5l6.5-11 4 6.2 2.3-3.2 6.2 8z"/><path d="M7.4 11.7l1.6 1.3 1.4-1.2"/></symbol>
+  <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9.5" r="2.3"/><path d="M16 14.3a4.5 4.5 0 0 1 5 4.7"/></symbol>
+  <symbol id="i-road" viewBox="0 0 24 24"><path d="M7 21L9 3M17 21l-2-18M12 5v2.5M12 11v2.5M12 17v2.5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l5-6 4 4 8-9"/><path d="M15 6h5v5"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H14a3.5 3.5 0 0 0 0-7h-4a3.5 3.5 0 0 1 0-7h5.6"/></symbol>
+  <symbol id="i-house" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></symbol>
+</svg>
+
+<main id="top">
+<div class="top">
+<div class="wrap">
+  <header class="site-head">
+    <a class="brand" href="#top" aria-label="Flood Sense, home">
+      <svg viewBox="0 0 34 34" aria-hidden="true"><rect x="2" y="2" width="30" height="30" rx="4" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M5 20c3-3 5-3 8 0s5 3 8 0 5-3 8 0" fill="none" stroke="var(--water)" stroke-width="3" stroke-linecap="round"/><path d="M5 26c3-3 5-3 8 0s5 3 8 0 5-3 8 0" fill="none" stroke="var(--water)" stroke-width="3" stroke-linecap="round"/><path d="M10 8h14M10 13h9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Flood Sense
+    </a>
+    <nav aria-label="Main">
+      <a href="#outputs">Outputs</a>
+      <a href="#inputs">Data inputs</a>
+      <a href="#signs">Read the signs</a>
+      <a href="#predict">How water is predicted</a>
+      <a href="#water">In the water</a>
+      <a href="#plan">Your plan</a>
+      <a href="#guide">Guide others out</a>
+    </nav>
+  </header>
+</div>
+
+  <div class="wrap hero">
+    <h1>Floods give hours of warning.</h1>
+    <p class="lede">If you can read the signs, you can be gone before the water arrives. The system reads rain and river sensors by itself, predicts when the water will reach each zone, and sends warnings without anyone pressing a button.</p>
+
+    <figure class="scene" id="scene-fig" style="margin-bottom:0">
+      <svg id="scene" viewBox="0 0 900 380" role="img" aria-labelledby="scene-title scene-desc" preserveAspectRatio="xMidYMid meet">
+        <title id="scene-title">River rising toward a street, with a safe route to higher ground</title>
+        <desc id="scene-desc">A side view of a river channel, a road with two houses, and a hill with a shelter. As the slider moves toward zero hours, the water rises until it covers the road.</desc>
+        <defs>
+          <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky-top)"/><stop offset="1" style="stop-color:var(--sky-bot)"/></linearGradient>
+          <clipPath id="air">
+            <path d="M0,0 L0,250 L120,250 L150,330 L330,330 L360,230 L600,230 C700,230 780,120 900,90 L900,0 Z"/>
+          </clipPath>
+        </defs>
+        <rect class="sky" width="900" height="380"/>
+
+        <g class="cloud">
+          <ellipse cx="90" cy="62" rx="50" ry="24"/>
+          <ellipse cx="132" cy="50" rx="44" ry="26"/>
+          <ellipse cx="168" cy="66" rx="46" ry="22"/>
+        </g>
+        <g class="rain">
+          <line x1="80" y1="96" x2="72" y2="120"/><line x1="110" y1="98" x2="102" y2="126"/>
+          <line x1="140" y1="96" x2="132" y2="122"/><line x1="170" y1="98" x2="162" y2="124"/>
+          <line x1="198" y1="92" x2="190" y2="114"/>
+          <line x1="60" y1="92" x2="52" y2="114"/><line x1="95" y1="94" x2="87" y2="116"/><line x1="125" y1="92" x2="117" y2="114"/><line x1="155" y1="94" x2="147" y2="116"/><line x1="185" y1="92" x2="177" y2="114"/>
+        </g>
+        <text class="svgt" x="30" y="28">Heavy rain upstream</text>
+
+        <path class="ground" d="M0,250 L120,250 L150,330 L330,330 L360,230 L600,230 C700,230 780,120 900,90 L900,380 L0,380 Z"/>
+        <rect class="road" x="360" y="230" width="240" height="7"/>
+
+        <!-- gauge staff -->
+        <rect class="staff-body" x="236" y="190" width="10" height="140"/>
+        <g class="staff-tick">
+          <line x1="236" y1="310" x2="246" y2="310"/><line x1="236" y1="290" x2="246" y2="290"/>
+          <line x1="236" y1="270" x2="246" y2="270"/><line x1="236" y1="250" x2="246" y2="250"/>
+          <line x1="236" y1="210" x2="246" y2="210"/>
+        </g>
+        <line class="staff-road" x1="236" y1="230" x2="246" y2="230"/>
+        <text class="svgt" x="254" y="226">Road level</text>
+        <text class="svgt" x="196" y="352">River gauge</text>
+
+        <!-- houses -->
+        <g>
+          <rect class="house-body" x="395" y="180" width="70" height="50"/>
+          <polygon class="house-roof" points="385,180 430,150 475,180"/>
+          <rect class="house-door" x="422" y="200" width="16" height="30"/>
+          <rect class="house-body" x="510" y="188" width="62" height="42"/>
+          <polygon class="house-roof" points="500,188 541,160 582,188"/>
+          <rect class="house-door" x="534" y="206" width="14" height="24"/>
+        </g>
+        <text class="svgt-strong" x="395" y="138">Your street</text>
+
+        <!-- shelter -->
+        <polygon class="house-roof" points="826,88 850,68 874,88"/>
+        <rect class="house-body" x="830" y="88" width="40" height="30"/>
+        <rect class="house-door" x="845" y="100" width="10" height="18"/>
+        <text class="svgt-strong" x="818" y="58" text-anchor="end">Shelter on higher ground</text>
+
+        <!-- route -->
+        <g id="routeG">
+          <path class="route" d="M432,222 L600,222 C690,222 770,126 828,104"/>
+          <text class="svgt-strong route-label" x="560" y="208" fill="#C23B2E" style="fill:#C23B2E">Leave this way</text>
+        </g>
+
+        <!-- water -->
+        <g clip-path="url(#air)">
+          <g id="waterG" style="transform:translateY(318px)">
+            <rect class="water-body" x="-100" y="0" width="1100" height="440"/>
+            <path id="wavePath" class="wave" d=""/>
+          </g>
+        </g>
+      </svg>
+    </figure>
+
+    <div class="monitor" id="monitor">
+      <p class="mon-live"><span class="dot" aria-hidden="true"></span><span id="mon-state">Monitoring automatically</span></p>
+      <dl class="mon-grid">
+        <div><dt>Clock</dt><dd id="mon-clock">Hour 3.6</dd></div>
+        <div><dt>River gauge</dt><dd id="mon-level">+0.3 m</dd></div>
+        <div><dt>Rain upstream</dt><dd id="mon-rain">0 mm/h</dd></div>
+        <div><dt>Rise rate</dt><dd id="mon-rate">0.00 m/h</dd></div>
+        <div><dt>Next flood forecast</dt><dd id="mon-next">None expected</dd></div>
+      </dl>
+      <button type="button" id="pause">Pause updates</button>
+      <p class="mon-note">A sample storm is replaying. A new sensor reading arrives about every two seconds, and each one re-runs the prediction. Nobody enters data. The pause button is only there so you can read.</p>
+    </div>
+
+    <div class="console" id="console" data-stage="watch">
+      <div>
+        <p class="hours" id="hours-readout">18 h</p>
+        <p class="pill" id="stage-name">Watch</p>
+        <p class="stage-lead" id="stage-lead"></p>
+      </div>
+      <div>
+        <h3>What to do now</h3>
+        <ul id="actions"></ul>
+      </div>
+    </div>
+    <p id="stage-status" class="visually-hidden" role="status" aria-live="polite"></p>
+  </div>
+</div>
+
+  <div class="wave bg-to-surface" aria-hidden="true"><svg viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,24 C240,48 480,2 720,22 C960,42 1200,4 1440,24 L1440,48 L0,48 Z"/></svg></div>
+  <section id="outputs" class="band">
+    <div class="wrap">
+      <h2>Five outputs that protect people</h2>
+      <p class="intro">The system reads five inputs and produces five answers on its own. Every new sensor reading re-runs the prediction and refreshes everything below. All numbers come from a sample storm in a made-up town. Your street in the scene is Old Town.</p>
+
+      <div class="map-block">
+        <h3>The town right now</h3>
+        <svg id="chart-map" class="map" viewBox="0 0 900 450" role="img" aria-label="Schematic map of the sample town: a river, five zones coloured by status, evacuation routes and three shelters"></svg>
+        <p class="legend map-legend"><span class="st" data-s="safe">Safe</span><span class="st" data-s="watch">Watch</span><span class="st" data-s="ready">Get ready</span><span class="st" data-s="leave">Leave now</span><span class="st" data-s="flooded">Flooded</span><br>Green dashes show people on the move. Red dashes show a road cut by water. The river widens as it rises.</p>
+      </div>
+
+      <ul class="strip">
+        <li><a href="#o-predict"><span class="k"><svg class="ico" aria-hidden="true"><use href="#i-trend"/></svg>Flood prediction</span><span class="v" id="k1">In about 1.5 h</span><span class="s" id="k1s"></span></a></li>
+        <li><a href="#o-risk"><span class="k"><svg class="ico" aria-hidden="true"><use href="#i-grid"/></svg>Risk zoning</span><span class="v" id="k2">4 zones at risk</span><span class="s" id="k2s"></span></a></li>
+        <li><a href="#o-route"><span class="k"><svg class="ico" aria-hidden="true"><use href="#i-route"/></svg>Evacuation routing</span><span class="v" id="k3">4 of 4 routes open</span><span class="s" id="k3s"></span></a></li>
+        <li><a href="#o-shelter"><span class="k"><svg class="ico" aria-hidden="true"><use href="#i-house"/></svg>Shelter allocation</span><span class="v" id="k4">0 people</span><span class="s" id="k4s"></span></a></li>
+        <li><a href="#o-score"><span class="k"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg>Lives-protected score</span><span class="v" id="k5">97%</span><span class="s" id="k5s"></span></a></li>
+      </ul>
+
+      <div class="out" id="o-predict">
+        <div>
+          <h3><svg class="ico" aria-hidden="true"><use href="#i-trend"/></svg>Flood prediction</h3>
+          <p class="what">A trend fitted to the latest gauge readings becomes a forecast of when the river reaches each zone. It refits with every reading, and the shaded band is its likely range.</p>
+          <p class="now" id="predict-text"></p>
+        </div>
+        <div>
+          <svg id="chart-predict" class="chart" viewBox="0 0 640 352" role="img" aria-label="Line chart of the river level rising over 24 hours, with the level at which each zone floods"></svg>
+          <p class="legend">Solid line: gauge readings. Dashed line and band: the automatic forecast and its likely range. Dots: when each zone is forecast to flood, filled once it has. Bars: rain upstream.</p>
+        </div>
+      </div>
+
+      <div class="out" id="o-risk">
+        <div>
+          <h3><svg class="ico" aria-hidden="true"><use href="#i-grid"/></svg>Risk zoning</h3>
+          <p class="what">Terrain and population sort each zone into a risk tier, so the lowest and most crowded areas move first.</p>
+          <p class="now" id="risk-text"></p>
+        </div>
+        <div>
+          <svg id="chart-risk" class="chart" viewBox="0 0 640 290" role="img" aria-label="Bars showing the height of each zone above the river and its risk tier, with the current river level drawn across them"></svg>
+          <p class="legend">Bar height is the zone's height above normal river level. The blue band is the river now.</p>
+        </div>
+      </div>
+
+      <div class="out" id="o-route">
+        <div>
+          <h3><svg class="ico" aria-hidden="true"><use href="#i-route"/></svg>Evacuation routing</h3>
+          <p class="what">The road network gives each zone a route to its shelter, and the latest time to leave by.</p>
+          <p class="now" id="route-text"></p>
+        </div>
+        <div>
+          <div class="route-map">
+            <h4 class="rm-title">Your safe route from Old Town</h4>
+            <svg id="chart-route" class="map" viewBox="0 0 640 360" role="img" aria-label="Schematic map of the safe route from Old Town: east on Fort Rd, then south over the Ring Rd bridge to District Stadium. A fallback road leads up to School Hill on the same side of the river."></svg>
+            <p class="rm-now" id="route-map-text"></p>
+            <ol class="route-steps">
+              <li>Walk east on <strong>Fort Rd</strong> to the Ring Rd junction.</li>
+              <li>Turn south on <strong>Ring Rd</strong> and cross the bridge. It is the first part of the route to go under, at about +7.7 m on the gauge.</li>
+              <li>Keep going to <strong>District Stadium</strong>. Allow 45 minutes on foot.</li>
+            </ol>
+            <p class="legend">Green dashes: the route to take now. Red dashes: a road under water. Grey dots: a route that is not advised right now. If the bridge goes under, the fallback is the road up to School Hill, which stays on your side of the river. Schematic map of the sample town, not to scale.</p>
+          </div>
+          <div class="table-wrap">
+            <table class="rt">
+              <caption class="visually-hidden">Route, walking time and latest departure for each zone, using sample data</caption>
+              <thead><tr><th scope="col">Zone</th><th scope="col">Route</th><th scope="col">Road</th><th scope="col">Walk</th><th scope="col">Leave by</th><th scope="col">Leave by, if you need help</th></tr></thead>
+              <tbody id="ro-body"></tbody>
+            </table>
+          </div>
+          <p class="legend">Leave-by times include 30 minutes to get ready. People who need help are assumed to take twice as long to travel.</p>
+        </div>
+      </div>
+
+      <div class="out" id="o-shelter">
+        <div>
+          <h3><svg class="ico" aria-hidden="true"><use href="#i-house"/></svg>Shelter allocation</h3>
+          <p class="what">Each zone is assigned a shelter with room for everyone, so no shelter is overfilled.</p>
+          <p class="now" id="shelter-text"></p>
+        </div>
+        <div>
+          <div id="shelters"></div>
+          <p class="legend">The light bar is everyone assigned to the shelter. The solid bar is people already ordered to move.</p>
+        </div>
+      </div>
+
+      <div class="out" id="o-score">
+        <div>
+          <h3><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg>Lives-protected score</h3>
+          <p class="what">The share of people in flood-prone zones who can reach a shelter before their zone floods, given the latest forecast and the orders the system has already sent.</p>
+          <div class="ring" role="img" aria-label="Lives-protected score ring"><svg viewBox="0 0 160 160"><circle class="ring-bg" cx="80" cy="80" r="66"/><circle id="ring-fg" class="ring-fg" cx="80" cy="80" r="66" transform="rotate(-90 80 80)"/><text id="score-big" x="80" y="94" text-anchor="middle">97%</text></svg></div>
+          <p class="now" id="score-text"></p>
+        </div>
+        <div>
+          <svg id="chart-score" class="chart" viewBox="0 0 640 266" role="img" aria-label="Line chart of the lives-protected score falling as the evacuation order is issued later"></svg>
+          <p class="legend">The line is the system's score at each reading. It stays high while there is time to leave and falls if a forecast arrives later than the time people need to reach shelter.</p>
+        </div>
+      </div>
+
+      <p class="sample-note">Sample data and a simple demo model. A real system would use calibrated river models and verified local data, and should be run with your disaster management authority.</p>
+    </div>
+  </section>
+
+  <div class="wave surface-to-bg" aria-hidden="true"><svg viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,24 C240,48 480,2 720,22 C960,42 1200,4 1440,24 L1440,48 L0,48 Z"/></svg></div>
+  <section id="inputs">
+    <div class="wrap">
+      <h2>Five inputs behind every decision</h2>
+      <p class="intro">The five outputs above are built from these five inputs. They refresh with every new reading. The numbers here are sample data for a made-up town, so you can see how the pieces fit together. Your street in the scene is Old Town.</p>
+
+      <ul class="ledger">
+        <li>
+          <div><h3><svg class="ico" aria-hidden="true"><use href="#i-rain"/></svg>Rainfall and river gauge streams</h3><p>How much water is coming and how fast the river is rising.</p></div>
+          <p class="val"><span id="v1">+2.0 m</span><small id="v1s"></small></p>
+        </li>
+        <li>
+          <div><h3><svg class="ico" aria-hidden="true"><use href="#i-terrain"/></svg>Terrain and elevation data</h3><p>Which streets sit low enough for the water to reach first.</p></div>
+          <p class="val">2.5 m to 12 m<small>Height of the five zones above normal river level.</small></p>
+        </li>
+        <li>
+          <div><h3><svg class="ico" aria-hidden="true"><use href="#i-people"/></svg>Population by zone</h3><p>Who lives where, and how many will need help to move.</p></div>
+          <p class="val">17,400 people<small>In five zones. 2,160 of them need help to move.</small></p>
+        </li>
+        <li>
+          <div><h3><svg class="ico" aria-hidden="true"><use href="#i-road"/></svg>Road network and shelters</h3><p>Which roads stay open, and where each zone should go.</p></div>
+          <p class="val"><span id="v4">0 of 4 routes cut</span><small>Three shelters: Govt High School, Community Hall and District Stadium.</small></p>
+        </li>
+        <li>
+          <div><h3><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg>Live flood alerts</h3><p>What the weather service, river agency and control room have ordered.</p></div>
+          <p class="val"><span id="v5">0 alerts</span><small id="v5s"></small></p>
+        </li>
+      </ul>
+
+      <details class="detail"><summary>Zone-by-zone numbers behind the outputs</summary>
+      <h3 class="zone-summary" id="zone-summary" aria-live="polite"></h3>
+      <div class="table-wrap">
+        <table class="zones">
+          <caption class="visually-hidden">Flood status for each zone, using sample data</caption>
+          <thead><tr><th scope="col">Zone</th><th scope="col">Height</th><th scope="col">People</th><th scope="col">Status</th><th scope="col">Water arrives</th><th scope="col">Route</th><th scope="col">What to do</th></tr></thead>
+          <tbody id="zone-body"></tbody>
+        </table>
+      </div>
+      </details>
+
+      <h3 class="feed-title">Automatic alerts so far</h3>
+      <ul class="feed" id="feed"></ul>
+      <p class="sample-note">Sample data only. To go live, each input needs a real feed: rain and gauge readings from your river agency, elevation from a terrain survey, population from census or ward records, roads and shelters from your disaster authority, and alerts from the official warning service.</p>
+    </div>
+  </section>
+
+  <div class="wave bg-to-surface" aria-hidden="true"><svg viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,24 C240,48 480,2 720,22 C960,42 1200,4 1440,24 L1440,48 L0,48 Z"/></svg></div>
+  <section id="signs" class="band">
+    <div class="wrap">
+      <h2>Read the signs early</h2>
+      <p class="intro">River floods build over hours or days. Flash floods can arrive in minutes. The signs below tell you which one you are facing, and they often show up before any official alert reaches your phone.</p>
+
+      <div class="signs">
+        <div>
+          <h3>In the sky and upstream</h3>
+          <ul>
+            <li>Heavy rain that does not let up for hours, especially in hills or catchments upstream of you.</li>
+            <li>News of a cloudburst, a dam or barrage release, or a breach somewhere above you.</li>
+            <li>Rain stopping where you are while rivers keep rising. Water takes time to travel down.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>At the river</h3>
+          <ul>
+            <li>The level rising steadily, or faster than usual, past marks you know.</li>
+            <li>Water turning thick and muddy, or carrying branches and rubbish.</li>
+            <li>A louder roar from the river.</li>
+            <li>A stream that suddenly drops in heavy rain. A blockage upstream may be holding water back.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Around your home</h3>
+          <ul>
+            <li>Drains backing up or pooling on low streets.</li>
+            <li>Water seeping up through floors or from the ground.</li>
+            <li>Low roads and underpasses going under.</li>
+            <li>Neighbours moving vehicles and belongings to higher ground.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flash">
+        <h3>Some floods give minutes, not hours</h3>
+        <p>In steep valleys, near small streams, or after a cloudburst, water can arrive almost without warning. If you see these signs there, move to high ground first and check alerts afterwards.</p>
+      </div>
+
+      <div class="split">
+        <div>
+          <h3 style="font-size:1.9rem;margin-bottom:.8rem">Watch or warning?</h3>
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                <tr><th scope="row">Watch</th><td>Conditions could lead to flooding. This is your time to prepare: pack, plan the route, check on neighbours.</td></tr>
+                <tr><th scope="row">Warning</th><td>Flooding is happening or about to. Act on your plan now and leave if you are in a low-lying area.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">Names and colours differ by country. In India, IMD weather warnings are colour-coded: orange means be prepared, red means take action.</p>
+        </div>
+        <div>
+          <h3 style="font-size:1.9rem;margin-bottom:.8rem">Where reliable alerts come from</h3>
+          <ul class="list-plain">
+            <li>Your national weather service, such as IMD in India.</li>
+            <li>The river agency that publishes gauge levels and forecasts, such as the Central Water Commission.</li>
+            <li>Your state or district disaster management authority and control room.</li>
+            <li>Official phone alerts and SMS, local radio, and loudspeaker announcements.</li>
+            <li>Neighbours and village or ward volunteers. Pass on what you hear, but check it against an official source.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wave surface-to-bg" aria-hidden="true"><svg viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,24 C240,48 480,2 720,22 C960,42 1200,4 1440,24 L1440,48 L0,48 Z"/></svg></div>
+  <section id="predict">
+    <div class="wrap">
+      <h2>How the water is predicted</h2>
+      <p class="intro">Forecasters follow rain from the sky into the river. Rain gauges, radar and satellites show how much has fallen. Gauges along the river show how fast the water is rising. Because floodwater takes time to travel, a rise upstream is an early warning for everyone downstream.</p>
+      <p class="intro">The system does this by itself every time a new reading arrives. Nobody types in a number. The values below are live.</p>
+      <ol class="pipe">
+        <li><h3>Read the sensors</h3><p class="pv" id="pp1">+0.3 m</p><p class="pn">The latest river gauge and rain readings.</p></li>
+        <li><h3>Check the data</h3><p class="pv" id="pp2">All readings valid</p><p class="pn">Rejects readings that jump too far and fills gaps from the last good value.</p></li>
+        <li><h3>Fit the trend</h3><p class="pv" id="pp3">Steady</p><p class="pn">A line through the last eight readings, plus any speeding up of the rise.</p></li>
+        <li><h3>Forecast each zone</h3><p class="pv" id="pp4">No flood expected</p><p class="pn">Time until the river reaches each zone's height, with a likely range.</p></li>
+        <li><h3>Act automatically</h3><p class="pv" id="pp5">0 orders sent</p><p class="pn">Alerts and evacuation orders go out when a zone's forecast falls inside its travel time.</p></li>
+      </ol>
+      <p class="note" style="max-width:66ch">A real system would run these steps on a server around the clock, using real sensors, and send alerts by SMS, loudspeaker and siren. The forecast here is deliberately cautious: it never assumes the rise will slow down.</p>
+    </div>
+  </section>
+
+  <div class="wave bg-to-surface" aria-hidden="true"><svg viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,24 C240,48 480,2 720,22 C960,42 1200,4 1440,24 L1440,48 L0,48 Z"/></svg></div>
+  <section id="water" class="band">
+    <div class="wrap">
+      <h2>Never test the water</h2>
+      <p class="intro">Most flood deaths happen when people walk or drive into water that looks shallow. Moving water is far stronger than it looks.</p>
+      <div class="depths" role="img" aria-label="Bar chart: 15 centimetres of moving water can knock an adult down, 30 centimetres can float many cars, 60 centimetres can carry away most vehicles.">
+        <div class="depth"><b>15 cm</b><span>Moving water this deep can knock an adult off their feet.</span><div class="bar" style="height:40px"></div></div>
+        <div class="depth"><b>30 cm</b><span>Enough to float many cars and lose control of them.</span><div class="bar" style="height:80px"></div></div>
+        <div class="depth"><b>60 cm</b><span>Can carry away most vehicles, including large ones.</span><div class="bar" style="height:160px"></div></div>
+      </div>
+      <p class="note">Also stay away from fallen power lines, open drains and manholes hidden under water, and flooded basements.</p>
+    </div>
+  </section>
+
+  <div class="wave surface-to-bg" aria-hidden="true"><svg viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,24 C240,48 480,2 720,22 C960,42 1200,4 1440,24 L1440,48 L0,48 Z"/></svg></div>
+  <section id="plan">
+    <div class="wrap">
+      <h2>Make your plan before the rain</h2>
+      <p class="intro">Fill this in once, with your household. It saves on this device only, and you can print it for the fridge or your go-bag.</p>
+
+      <div class="plan">
+        <div class="fields">
+          <div class="field"><label for="f-meet">Family meeting point</label><input id="f-meet" type="text" data-save="meet" placeholder="Where we gather if we are separated"></div>
+          <div class="field"><label for="f-route">Route to higher ground or shelter</label><textarea id="f-route" data-save="route" placeholder="Roads that stay above water, in order"></textarea></div>
+          <div class="field"><label for="f-shelter">Nearest shelter or safe relative's home</label><input id="f-shelter" type="text" data-save="shelter"></div>
+          <div class="field"><label for="f-contacts">Emergency contacts</label><textarea id="f-contacts" data-save="contacts" placeholder="Name and number. Include one person outside your area."></textarea></div>
+          <div class="field"><label for="f-needs">Who needs help to move?</label><textarea id="f-needs" data-save="needs" placeholder="Older people, children, anyone with medicines or mobility needs"></textarea></div>
+          <div class="btn-row print-hide"><button type="button" class="primary" id="print">Print my plan</button><button type="button" id="clear">Clear this plan</button></div>
+        </div>
+        <div>
+          <h3 class="bag-title">Go-bag checklist</h3>
+          <ul class="bag" id="bag"></ul>
+          <p class="note">Keep it packed, near the door, and above the floor.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wave bg-to-surface" aria-hidden="true"><svg viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,24 C240,48 480,2 720,22 C960,42 1200,4 1440,24 L1440,48 L0,48 Z"/></svg></div>
+  <section id="guide" class="band">
+    <div class="wrap">
+      <h2>Guide others out</h2>
+      <p class="intro">Evacuations work when everyone knows one plan. If you are a ward member, volunteer, teacher or neighbourhood leader, these steps help people leave on time.</p>
+      <div class="split">
+        <ul class="list-plain">
+          <li><strong>Make a list ahead of time</strong> of households that need help: older people, people with disabilities, pregnant women, young children, bedridden patients.</li>
+          <li><strong>Agree one route and one shelter</strong> per area. Check that the route stays above water and mark it clearly.</li>
+          <li><strong>Set the trigger in advance</strong>, such as a gauge reading or an official warning, so nobody waits for permission.</li>
+        </ul>
+        <ul class="list-plain">
+          <li><strong>Alert by every channel</strong>: phone calls, messaging groups, loudspeakers and door-to-door. Use plain words: "Leave now. Go to the school on the hill."</li>
+          <li><strong>Move people who need help first</strong>, and send households out in groups, not alone.</li>
+          <li><strong>Count heads at the shelter</strong> and keep the list current, so rescuers know who is still missing.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="wave surface-to-bg" aria-hidden="true"><svg viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,24 C240,48 480,2 720,22 C960,42 1200,4 1440,24 L1440,48 L0,48 Z"/></svg></div>
+  <footer>
+  <div class="wrap">
+    <p class="emergency">Emergency in India: call 112</p>
+    <p>If you are outside India, use your local emergency number and write it into your plan above.</p>
+    <p>This page gives general safety guidance based on widely shared advice from disaster-management agencies. The readings, zone board and alerts come from a built-in sample storm for a made-up town. This page does not show live water levels or forecasts. Always follow instructions from your local authorities.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var $ = function(s){return document.querySelector(s)};
+  var store = {
+    get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},
+    set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}},
+    del:function(k){try{localStorage.removeItem(k)}catch(e){}}
+  };
+  function fmt(n){ return n.toLocaleString("en-US"); }
+  function half(x){ return Math.round(x*2)/2; }
+  function r1(n){ return Math.round(n*10)/10; }
+  function shortName(z){ return z.n.replace(" (your street)",""); }
+
+  /* ---------- Sample town (made-up data) ---------- */
+  var ZONES = [
+    {n:"Riverside Colony",e:2.5,p:3200,help:410,route:"Station Rd to Hill Rd",re:4.0,shelter:"Govt High School"},
+    {n:"Canal Side",e:4.0,p:2400,help:300,route:"Canal Bridge to Temple St",re:5.0,shelter:"Community Hall"},
+    {n:"Market Road",e:5.5,p:4100,help:520,route:"Market Rd to Ring Rd",re:7.0,shelter:"District Stadium"},
+    {n:"Old Town (your street)",e:7.9,p:5800,help:780,route:"Fort Rd to Ring Rd",re:7.7,shelter:"District Stadium"},
+    {n:"School Hill",e:12,p:1900,help:150,route:"None needed",re:99,shelter:"Home, or Govt High School"}
+  ];
+  var OLD = 3;
+  var WALK = {"Riverside Colony":40,"Canal Side":35,"Market Road":50,"Old Town (your street)":45};
+  var SHELTERS = [
+    {n:"Govt High School",cap:3500},
+    {n:"Community Hall",cap:2600},
+    {n:"District Stadium",cap:12000}
+  ];
+  var TIERS = {severe:"Severe",high:"High",moderate:"Moderate",low:"Low"};
+  function need(z,helped){ var w = (WALK[z.n]||0)/60; return 0.5 + (helped ? 2*w : w); }
+  function tierOf(z){ return z.e<3 ? "severe" : z.e<5 ? "high" : z.e<9 ? "moderate" : "low"; }
+
+  var STAGES = {
+    clear:{
+      name:"Clear",
+      lead:"Rivers are normal. The system watches rain and river sensors around the clock and will warn you on its own.",
+      actions:[
+        "<strong>Nothing to do right now.</strong>",
+        "<strong>Keep your plan up to date</strong>: meeting point, route and contacts.",
+        "<strong>Check your go-bag</strong> once a season.",
+        "<strong>Make sure your phone</strong> can receive official warnings."
+      ]
+    },
+    watch:{
+      name:"Watch",
+      lead:"Heavy rain is falling upstream and the river is expected to rise. You have time to prepare calmly.",
+      actions:[
+        "<strong>Check official alerts</strong> every hour.",
+        "<strong>Charge phones</strong> and power banks.",
+        "<strong>Pack your go-bag</strong> with documents in a waterproof bag, medicines, water and a torch.",
+        "<strong>Agree your route</strong> and meeting point with everyone at home.",
+        "<strong>Move vehicles and valuables</strong> off low ground."
+      ]
+    },
+    warning:{
+      name:"Warning",
+      lead:"Flooding is likely. Act on your plan now rather than waiting to see the water.",
+      actions:[
+        "<strong>Move valuables, electronics and papers</strong> to an upper floor or high shelf.",
+        "<strong>Fill clean containers</strong> with drinking water.",
+        "<strong>Switch off gas.</strong> Switch off mains power if water is about to enter and you can reach the switch while dry.",
+        "<strong>Tell your neighbours</strong>, especially anyone who needs help to move.",
+        "<strong>Leave now</strong> if you live on low ground or beside the river."
+      ]
+    },
+    evacuate:{
+      name:"Evacuate",
+      lead:"Leave now. Do not wait for water at your door, because roads can go under first.",
+      actions:[
+        "<strong>Take your go-bag</strong> and follow your planned route to higher ground or a shelter.",
+        "<strong>Stay on roads you know are above water.</strong> Never wade through moving water.",
+        "<strong>Lock up and message a contact</strong> to say where you are going.",
+        "<strong>Help neighbours who need a hand</strong>, but do not put yourself in danger.",
+        "<strong>Do not go back</strong> for belongings."
+      ]
+    },
+    flood:{
+      name:"Flooding",
+      lead:"Water is on the road. Your priority is to stay out of it and get help.",
+      actions:[
+        "<strong>Do not walk, swim or drive</strong> through floodwater. 15 cm of moving water can knock you down.",
+        "<strong>If you are still inside</strong>, go to the highest safe floor and take your phone, torch and water.",
+        "<strong>Call 112</strong> or your local emergency number and give your exact location.",
+        "<strong>Keep away from power lines</strong> and anything electrical that is wet.",
+        "<strong>Signal from a window</strong> with a torch or bright cloth. Avoid closed attics with no way out."
+      ]
+    },
+    recede:{
+      name:"Receding",
+      lead:"The river has peaked and is falling. Floodwater can still be dangerous.",
+      actions:[
+        "<strong>Stay where you are</strong> until the authorities give the all-clear.",
+        "<strong>Keep out of floodwater.</strong> It can hide holes, debris and live wires.",
+        "<strong>Do not drive</strong> on flooded roads, even if the water looks lower.",
+        "<strong>Check on neighbours</strong> who may need help.",
+        "<strong>Photograph damage</strong> before you clean up, for insurance and relief claims."
+      ]
+    }
+  };
+
+  /* ---------- Simulated sensor stream (stands in for real feeds) ---------- */
+  var DT = 0.4, TICK_MS = 1800, T0 = 3.2, T_END = 40, TMAX = 44, RESTART_MS = 7000;
+  var N = Math.round(T_END/DT);
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function gauss(r){ var u=1-r(), v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+  function smooth(x){ x=Math.max(0,Math.min(1,x)); return x*x*(3-2*x); }
+  function trueLevel(t){ return t<=26 ? 0.3+8.5*smooth((t-8)/18) : 0.3+8.5*Math.exp(-(t-26)/6); }
+  function trueRain(t){ var z=(t-9)/3.2; return 18*Math.exp(-z*z); }
+  var READ = (function(){
+    var rng = mulberry32(7), out = [], i;
+    for(i=0;i<=N;i++){
+      var t = Math.round(i*DT*10)/10;
+      out.push({t:t, level:trueLevel(t)+gauss(rng)*0.04, rain:Math.max(0,trueRain(t)+gauss(rng)*0.8), kind:""});
+    }
+    var sp = Math.round(15.2/DT), ms = Math.round(30/DT);
+    out[sp].level += 3.1; out[sp].kind = "spike";
+    out[ms].level = null; out[ms].kind = "missing";
+    return out;
+  })();
+
+  /* ---------- Automatic engine ---------- */
+  var sim = null, paused = false, finished = false, timer = null, restartTimer = null;
+
+  function newSim(){
+    return {i:-1,t:0,obs:0.3,lastGood:null,hist:[],rain:[],scores:[],alerts:[],fired:{},
+      rejected:0,gaps:0,check:"ok",everFlooded:{},floodT:{},orderT:{},peak:0,
+      p:null,etas:[],states:[],stage:"clear",storm:false,score:null,rain24:0,rainNow:0};
+  }
+  function ingest(rd){
+    var lv, note = "ok";
+    if(rd.level === null){ sim.gaps++; lv = sim.lastGood; note = "gap"; }
+    else if(sim.lastGood !== null && Math.abs(rd.level - sim.lastGood) > 1.2){ sim.rejected++; lv = sim.lastGood; note = "rejected"; }
+    else { lv = rd.level; }
+    sim.lastGood = lv; sim.obs = lv; sim.t = rd.t; sim.check = note;
+    sim.hist.push({t:rd.t, l:lv});
+    sim.rain.push({t:rd.t, r:rd.rain});
+    sim.rainNow = rd.rain;
+    if(lv > sim.peak) sim.peak = lv;
+    return note;
+  }
+  function linfit(arr){
+    var n = arr.length, tm = 0, ym = 0, i;
+    for(i=0;i<n;i++){ tm += arr[i].t; ym += arr[i].l; }
+    tm /= n; ym /= n;
+    var sxx = 0, sxy = 0;
+    for(i=0;i<n;i++){ sxx += (arr[i].t-tm)*(arr[i].t-tm); sxy += (arr[i].t-tm)*(arr[i].l-ym); }
+    var slope = sxx ? sxy/sxx : 0, rss = 0;
+    for(i=0;i<n;i++){ var res = arr[i].l - (ym + slope*(arr[i].t-tm)); rss += res*res; }
+    var sd = n > 2 ? Math.sqrt(rss/(n-2)) : 0;
+    return {slope:slope, tm:tm, ym:ym, sd:sd, se: sxx ? sd/Math.sqrt(sxx) : 0};
+  }
+  function predict(){
+    var H = sim.hist, n = H.length, W = 8, last = H[n-1];
+    if(n < W) return {L:last.l, rate:0, se:0.05, acc:0, band:0.08, t:last.t};
+    var f1 = linfit(H.slice(n-W));
+    var L = f1.ym + f1.slope*(last.t - f1.tm);
+    var acc = 0;
+    if(n >= 2*W){ var f0 = linfit(H.slice(n-2*W, n-W)); acc = (f1.slope - f0.slope)/(W*DT); }
+    acc = Math.max(0, Math.min(0.3, acc));
+    return {L:L, rate:f1.slope, se:f1.se, acc:acc, band:1.5*f1.se + 0.1*Math.max(f1.slope,0), t:last.t};
+  }
+  function solve(e, L, rate, acc){
+    if(L >= e) return 0;
+    if(rate < 0.05) return null;
+    if(acc < 0.001) return (e-L)/rate;
+    return (-rate + Math.sqrt(rate*rate + 2*acc*(e-L)))/acc;
+  }
+  function etaFor(z, p){
+    if(z.e > 8) return null;
+    if(sim.obs >= z.e) return {t:0, lo:0, hi:0};
+    var t = solve(z.e, p.L, p.rate, p.acc);
+    if(t === null) return null;
+    var up = solve(z.e, p.L, p.rate + p.band, p.acc);
+    var dn = solve(z.e, p.L, p.rate - p.band, p.acc);
+    return {t:t, lo: up === null ? t : up, hi: dn};
+  }
+  function zoneState(z, eta, storm){
+    var obs = sim.obs;
+    if(z.e > 8) return {s:"safe", label:"Safe", act:"Shelter zone. Keep entrances open for people arriving."};
+    if(obs >= z.e){
+      return {s:"flooded", label:"Flooded", act: obs > z.re
+        ? "Cut off. Go to the highest floor and call 112."
+        : "Water is rising here. Go only if you can reach the route without wading. Otherwise go upstairs and call 112."};
+    }
+    if(sim.everFlooded[z.n] && obs > 1.6){ return {s:"watch", label:"Receding", act:"Water is going down. Wait for the all-clear before you return."}; }
+    if(obs > z.re){ return {s:"leave", label:"Route cut", act:"The road to " + z.shelter + " is under water. Use the alternate road, or go upstairs and call 112."}; }
+    var t = eta ? eta.t : null;
+    if(t !== null && t <= 3){ return {s:"leave", label:"Leave now", act:"Leave for " + z.shelter + " via " + z.route + "."}; }
+    if(t !== null && t <= 8){ return {s:"ready", label:"Get ready", act:"Pack, tell neighbours, and be ready to go to " + z.shelter + "."}; }
+    if(t !== null || storm){ return {s:"watch", label:"Watch", act:"Stay alert. The system re-checks the gauge with every reading."}; }
+    return {s:"safe", label:"Clear", act:"No action needed. The system is watching."};
+  }
+  function scoreNow(){
+    var atRisk = 0, safe = 0;
+    ZONES.forEach(function(z,i){
+      if(z.e > 8) return;
+      atRisk += z.p;
+      var able = z.p - z.help, lead, et = sim.etas[i];
+      if(sim.floodT[z.n] !== undefined){
+        lead = sim.orderT[z.n] !== undefined ? sim.floodT[z.n] - sim.orderT[z.n] : 0;
+      } else if(!et){
+        lead = Infinity;
+      } else {
+        lead = et.t + (sim.orderT[z.n] !== undefined ? sim.t - sim.orderT[z.n] : 0);
+      }
+      if(lead >= need(z,false)) safe += able;
+      if(lead >= need(z,true)) safe += z.help;
+    });
+    return {atRisk:atRisk, safe:safe, pct: atRisk ? safe/atRisk*100 : 0};
+  }
+  function A(key, text){
+    if(sim.fired[key]) return;
+    sim.fired[key] = 1;
+    sim.alerts.push({t:sim.t, text:text});
+  }
+  function analyze(note, rd){
+    var p = predict(); sim.p = p;
+    var recent = sim.rain.slice(-5), s = 0, i;
+    for(i=0;i<recent.length;i++) s += recent[i].r;
+    var rainAvg = recent.length ? s/recent.length : 0;
+    var r24 = 0;
+    for(i=0;i<sim.rain.length;i++){ if(sim.rain[i].t >= sim.t - 24) r24 += sim.rain[i].r*DT; }
+    sim.rain24 = r24;
+    sim.storm = rainAvg >= 4;
+
+    ZONES.forEach(function(z){
+      if(z.e <= 8 && sim.obs >= z.e){
+        sim.everFlooded[z.n] = true;
+        if(sim.floodT[z.n] === undefined) sim.floodT[z.n] = sim.t;
+      }
+    });
+    sim.etas = ZONES.map(function(z){ return etaFor(z, p); });
+    sim.states = ZONES.map(function(z,k){ return zoneState(z, sim.etas[k], sim.storm); });
+    ZONES.forEach(function(z,k){
+      if(sim.states[k].s === "leave" && sim.orderT[z.n] === undefined) sim.orderT[z.n] = sim.t;
+    });
+    sim.stage = (function(){
+      var o = ZONES[OLD], eta = sim.etas[OLD];
+      if(sim.obs >= o.e) return "flood";
+      if(sim.everFlooded[o.n] && sim.obs > 1.6) return "recede";
+      if(eta && eta.t <= 4) return "evacuate";
+      if(eta && eta.t <= 12) return "warning";
+      if(eta || sim.storm) return "watch";
+      return "clear";
+    })();
+    sim.score = scoreNow();
+    sim.scores.push({t:sim.t, pct:sim.score.pct});
+
+    /* Automatic alerts */
+    if(note === "rejected") A("rej"+sim.i, "Data check: a reading jumped by more than 1.2 m and was rejected.");
+    if(note === "gap") A("gap"+sim.i, "Data check: a reading was missing. The last good value was used.");
+    if(rainAvg >= 4) A("rain", "Heavy rain detected upstream. Watching the river gauge closely.");
+    if(r24 >= 60) A("rain60", "Rain has passed 60 mm in 24 hours. Orange alert issued automatically.");
+    if(p.rate >= 0.15 && sim.obs > 0.8) A("rising", "River is rising about " + p.rate.toFixed(2) + " m an hour. Automatic forecast started.");
+    if(sim.obs >= 5) A("warnlevel", "Gauge crossed the warning level (+5.0 m).");
+    ZONES.forEach(function(z,k){
+      if(z.e > 8) return;
+      var et = sim.etas[k], st = sim.states[k];
+      if(et && et.t > 0 && et.t <= 12) A("fc-"+z.n, "Forecast: " + shortName(z) + " likely to flood in about " + half(et.t) + " h.");
+      if(st.s === "ready") A("ready-"+z.n, "Get-ready alert sent to " + shortName(z) + ".");
+      if(st.s === "leave" && st.label === "Leave now") A("leave-"+z.n, "Automatic order: " + shortName(z) + ", leave now for " + z.shelter + ".");
+      if(sim.obs > z.re) A("cut-"+z.n, "Road cut: " + z.route + " is under water.");
+      if(st.s === "flooded") A("fl-"+z.n, k === OLD ? "Water over the road in Old Town. Call 112 for rescue." : shortName(z) + " is flooded.");
+    });
+    if(sim.everFlooded[ZONES[OLD].n] && p.rate < 0) A("peak", "River has peaked at +" + sim.peak.toFixed(1) + " m and is falling. Stay out of floodwater.");
+    if(sim.everFlooded[ZONES[OLD].n] && sim.obs <= 1.6) A("allclear", "All clear: the river is back within its banks.");
+  }
+  function step(){
+    sim.i++;
+    var rd = READ[sim.i];
+    var note = ingest(rd);
+    analyze(note, rd);
+  }
+  function resetSim(){
+    sim = newSim();
+    var i0 = Math.round(T0/DT), k;
+    for(k=0;k<=i0;k++){ step(); }
+    sim.alerts = []; sim.fired = {};
+  }
+
+  /* ---------- Rendering ---------- */
+  var lastStage = "";
+  function etaText(et){
+    if(!et) return "Not expected";
+    if(et.t <= 0) return "Now";
+    var s = "In about " + half(et.t) + " h";
+    if(et.hi === null) s += " (" + half(et.lo) + " h or more)";
+    else if(Math.abs(et.hi - et.lo) >= 0.5) s += " (" + half(et.lo) + " to " + half(et.hi) + " h)";
+    return s;
+  }
+  function nextFlood(){
+    var best = null;
+    ZONES.forEach(function(z,i){
+      var et = sim.etas[i];
+      if(z.e > 8 || !et || et.t <= 0) return;
+      if(best === null || et.t < best.t) best = {n:shortName(z), t:et.t};
+    });
+    return best;
+  }
+
+  function renderMonitor(){
+    var p = sim.p, nx = nextFlood();
+    $("#mon-clock").textContent = "Hour " + sim.t.toFixed(1);
+    $("#mon-level").textContent = "+" + sim.obs.toFixed(1) + " m";
+    $("#mon-rain").textContent = Math.round(sim.rainNow) + " mm/h";
+    $("#mon-rate").textContent = (p.rate > 0 ? "+" : "") + p.rate.toFixed(2) + " m/h";
+    $("#mon-next").textContent = nx ? nx.n + " in " + half(nx.t) + " h" : "None expected";
+    var state = paused ? "Updates paused" : (finished ? "Sample storm over. Restarting by itself" : "Monitoring automatically");
+    $("#mon-state").textContent = state;
+    $("#monitor").classList.toggle("paused", paused || finished);
+  }
+  function renderConsole(){
+    var key = sim.stage, s = STAGES[key], eta = sim.etas[OLD], txt;
+    if(key === "flood") txt = "Now";
+    else if(key === "recede") txt = "Falling";
+    else if(key === "clear") txt = "Clear";
+    else if(eta) txt = Math.max(1, Math.round(eta.t)) + " h";
+    else txt = "Rain";
+    $("#hours-readout").textContent = txt;
+    $("#waterG").style.transform = "translateY(" + r1(Math.max(205, 330 - (sim.obs/7.9)*100)) + "px)";
+    $("#scene-fig").classList.toggle("show-route", key === "warning" || key === "evacuate" || key === "flood");
+    if(key !== lastStage){
+      lastStage = key;
+      $("#console").setAttribute("data-stage", key);
+      $("#stage-name").textContent = s.name;
+      $("#stage-lead").textContent = s.lead;
+      $("#actions").innerHTML = s.actions.map(function(a){ return "<li>"+a+"</li>"; }).join("");
+      $("#stage-status").textContent = "Stage: " + s.name + ". " + s.lead;
+    }
+  }
+
+  function renderPredict(){
+    var p = sim.p, now = sim.t, obs = sim.obs;
+    var Lx = 52, R = 620, T = 20, B = 250, s = "", m;
+    function X(t){ return r1(Lx + (t/TMAX)*(R-Lx)); }
+    function Y(v){ return r1(B - (Math.min(v,10)/10)*(B-T)); }
+    for(m=0; m<=10; m+=2){
+      s += '<line class="ch-grid" x1="'+Lx+'" x2="'+R+'" y1="'+Y(m)+'" y2="'+Y(m)+'"/>'
+         + '<text class="ch-t" x="'+(Lx-8)+'" y="'+(Y(m)+4)+'" text-anchor="end">+'+m+' m</text>';
+    }
+    [0,8,16,24,32,40].forEach(function(v){
+      s += '<text class="ch-t" x="'+X(v)+'" y="'+(B+18)+'" text-anchor="middle">'+v+' h</text>';
+    });
+    var rb = 330, rh = 40, bw = Math.max(2, (R-Lx)/TMAX*DT - 1);
+    s += '<line class="ch-grid" x1="'+Lx+'" x2="'+R+'" y1="'+rb+'" y2="'+rb+'"/>'
+       + '<text class="ch-t" x="'+(Lx-8)+'" y="'+(rb-8)+'" text-anchor="end">Rain</text>';
+    sim.rain.forEach(function(q){
+      var hh = Math.min(rh, q.r/20*rh);
+      s += '<rect fill="var(--water)" opacity=".55" x="'+r1(X(q.t)-bw/2)+'" y="'+r1(rb-hh)+'" width="'+r1(bw)+'" height="'+r1(hh)+'"/>';
+    });
+    s += '<text class="ch-t" x="'+((Lx+R)/2)+'" y="'+(rb+18)+'" text-anchor="middle">Hours since monitoring began. Bars show rain upstream, up to 20 mm/h.</text>';
+
+    var forecasting = p.rate >= 0.05 && obs < 9.5;
+    if(forecasting){
+      var hz = Math.min(16, TMAX - now), up = "", lo = [], dt, center = "";
+      for(dt=0; dt<=hz+0.001; dt+=0.8){
+        var c = p.L + p.rate*dt + 0.5*p.acc*dt*dt;
+        up += X(now+dt)+","+Y(c + p.band*dt)+" ";
+        lo.unshift(X(now+dt)+","+Y(Math.max(0, c - p.band*dt)));
+        center += X(now+dt)+","+Y(c)+" ";
+      }
+      s += '<polygon class="ch-band" points="'+up+lo.join(" ")+'"/>'
+         + '<polyline class="ch-fc" points="'+center+'"/>';
+    }
+    ZONES.forEach(function(z,i){
+      if(z.e > 8) return;
+      var y = Y(z.e), et = sim.etas[i], fl = sim.floodT[z.n] !== undefined;
+      s += '<line class="ch-zone" x1="'+Lx+'" x2="'+R+'" y1="'+y+'" y2="'+y+'"/>'
+         + '<text class="ch-t" x="'+(Lx+6)+'" y="'+(y-5)+'">'+shortName(z)+' floods</text>';
+      if(fl){ s += '<circle class="ch-dot-on" cx="'+X(sim.floodT[z.n])+'" cy="'+y+'" r="5.5"/>'; }
+      else if(et && now + et.t <= TMAX){ s += '<circle class="ch-dot" cx="'+X(now+et.t)+'" cy="'+y+'" r="5.5"/>'; }
+    });
+    var pts = "";
+    sim.hist.forEach(function(q){ pts += X(q.t)+","+Y(q.l)+" "; });
+    s += '<polyline class="ch-line" points="'+pts+'"/>'
+       + '<line class="ch-vline" x1="'+X(now)+'" y1="'+Y(obs)+'" x2="'+X(now)+'" y2="'+B+'"/>'
+       + '<circle class="ch-mark" cx="'+X(now)+'" cy="'+Y(obs)+'" r="6"/>';
+    var lx = X(now), tx, ty, anchor;
+    if(lx > R-110){ tx = lx-10; ty = Y(obs)-12; anchor = "end"; }
+    else { tx = lx+10; ty = Math.min(Y(obs)+22, B-8); anchor = "start"; }
+    s += '<text class="ch-t-strong" x="'+tx+'" y="'+ty+'" text-anchor="'+anchor+'">+'+obs.toFixed(1)+' m now</text>';
+    $("#chart-predict").innerHTML = s;
+
+    var nx = nextFlood(), txt;
+    if(forecasting){
+      txt = "The river is at +" + obs.toFixed(1) + " m and rising about " + p.rate.toFixed(2) + " m an hour."
+        + (nx ? " " + nx.n + " is forecast to flood in about " + half(nx.t) + " h." : "");
+    } else if(p.rate <= -0.05){
+      txt = "The river is at +" + obs.toFixed(1) + " m and falling about " + Math.abs(p.rate).toFixed(2) + " m an hour. No new flooding is forecast.";
+    } else {
+      txt = "The river is at +" + obs.toFixed(1) + " m and steady. No flooding is forecast right now.";
+    }
+    $("#predict-text").textContent = txt;
+  }
+
+  function renderRisk(){
+    var base = 240, sc = 16, bars = "", labels = "", L = sim.obs;
+    ZONES.forEach(function(z,i){
+      var x = 40 + i*118, ht = z.e*sc, tr = tierOf(z), flooded = z.e <= 8 && z.e <= L;
+      bars += '<rect class="zbar tier-'+tr+'" x="'+x+'" y="'+r1(base-ht)+'" width="84" height="'+r1(ht)+'" rx="3"/>';
+      labels += '<text class="ch-t-strong" x="'+(x+42)+'" y="'+r1(base-ht-8)+'" text-anchor="middle">'+TIERS[tr]+'</text>'
+              + '<text class="ch-t" x="'+(x+42)+'" y="'+(base+18)+'" text-anchor="middle">'+shortName(z)+'</text>'
+              + '<text class="ch-t" x="'+(x+42)+'" y="'+(base+35)+'" text-anchor="middle">'+fmt(z.p)+' people</text>';
+      if(flooded){ labels += '<text class="ch-flood-tag" x="'+(x+42)+'" y="'+r1(base-ht+18)+'" text-anchor="middle">Flooded</text>'; }
+    });
+    var wy = r1(base - L*sc);
+    var water = '<rect class="risk-water" x="20" y="'+wy+'" width="600" height="'+r1(L*sc)+'"/>'
+              + '<line class="risk-line" x1="20" x2="620" y1="'+wy+'" y2="'+wy+'"/>'
+              + '<text class="ch-t-strong" x="620" y="'+r1(wy-8)+'" text-anchor="end">River +'+L.toFixed(1)+' m</text>';
+    $("#chart-risk").innerHTML = '<line class="ch-grid" x1="20" x2="620" y1="'+base+'" y2="'+base+'"/>' + bars + water + labels;
+    var fl = 0;
+    ZONES.forEach(function(z){ if(z.e <= 8 && L >= z.e) fl++; });
+    $("#risk-text").textContent = "One zone is severe, one high and two moderate. " + fl + " of 4 at-risk zones are under water now.";
+  }
+
+  function renderMap(){
+    var COL = {safe:"#1F6B45", watch:"#E3B02A", ready:"#B84A0E", leave:"#B3261E", flooded:"#5B1A4A"};
+    var BOX = {"Riverside Colony":[70,307], "Canal Side":[250,119], "Market Road":[380,317], "Old Town (your street)":[555,39], "School Hill":[760,20]};
+    var ROUTE = {
+      "Riverside Colony":{d:"M170,391 C200,395 225,398 250,400", mid:[210,396]},
+      "Canal Side":{d:"M250,150 C230,110 215,85 196,66", mid:[222,102]},
+      "Market Road":{d:"M530,359 C620,372 720,400 790,405", mid:[660,386]},
+      "Old Town (your street)":{d:"M705,81 C760,100 740,300 800,378", mid:[747,189]}
+    };
+    var SH = [{n:"Govt High School",x:250,y:380,ly:438},{n:"Community Hall",x:150,y:30,ly:20},{n:"District Stadium",x:790,y:380,ly:438}];
+    var L = sim.obs, st = sim.states;
+    function riverY(x){ return 225 + 40*Math.sin((x-80)/900*Math.PI*2); }
+    var d = "", x;
+    for(x=-20; x<=920; x+=10){ d += (x===-20 ? "M" : "L") + x + "," + r1(riverY(x)) + " "; }
+    var s = '<g fill="none" stroke="var(--line)" stroke-width="1.5"><ellipse cx="825" cy="65" rx="88" ry="56"/><ellipse cx="825" cy="65" rx="60" ry="38"/><ellipse cx="825" cy="65" rx="32" ry="20"/></g>';
+    ZONES.forEach(function(z,i){
+      var b = BOX[z.n], hi = z.e > 8, c = COL[st[i].s];
+      s += '<rect x="'+b[0]+'" y="'+b[1]+'" width="'+(hi?130:150)+'" height="'+(hi?90:84)+'" rx="14" fill="'+c+'" fill-opacity=".2" stroke="'+c+'" stroke-width="3"/>';
+    });
+    s += '<path class="map-river" d="'+d+'" style="stroke-width:'+r1(40 + L*5.5)+'px"/>';
+    ZONES.forEach(function(z,i){
+      if(z.e > 8) return;
+      if(st[i].s === "flooded"){
+        var b = BOX[z.n];
+        s += '<rect x="'+b[0]+'" y="'+b[1]+'" width="150" height="84" rx="14" fill="var(--water)" fill-opacity=".45"/>';
+      }
+    });
+    var crossCut = false;
+    ZONES.forEach(function(z,i){
+      var r = ROUTE[z.n]; if(!r) return;
+      var cut = L > z.re, s2 = st[i].s;
+      var cls = cut ? "route-cut" : ((s2 === "leave" || s2 === "ready") ? "route-go" : "route-idle");
+      s += '<path class="'+cls+'" d="'+r.d+'"/>';
+      if(i === OLD) crossCut = cut;
+    });
+    s += '<rect class="bridge'+(crossCut ? ' cut-b' : '')+'" x="-48" y="-7" width="96" height="14" rx="3" transform="translate(747 189) rotate(81)"/>';
+    ZONES.forEach(function(z){
+      var r = ROUTE[z.n]; if(!r) return;
+      if(L > z.re){
+        s += '<circle cx="'+r.mid[0]+'" cy="'+r.mid[1]+'" r="11" fill="#B3261E"/><text class="mz-x" x="'+r.mid[0]+'" y="'+(r.mid[1]+6)+'" text-anchor="middle">\u00d7</text>';
+      }
+    });
+    SH.forEach(function(sh){
+      s += '<g transform="translate('+sh.x+' '+sh.y+')"><polygon points="0,16 22,0 44,16" fill="var(--muted)"/><rect x="4" y="16" width="36" height="24" fill="var(--staff)" stroke="var(--ink)" stroke-width="1.5"/><rect x="18" y="26" width="8" height="14" fill="var(--road)"/></g>'
+         + '<text class="mz-sub" x="'+(sh.x+22)+'" y="'+sh.ly+'" text-anchor="middle">'+sh.n+'</text>';
+    });
+    ZONES.forEach(function(z,i){
+      var b = BOX[z.n];
+      s += '<text class="mz-name" x="'+(b[0]+12)+'" y="'+(b[1]+27)+'">'+shortName(z)+'</text>'
+         + '<text class="mz-sub" x="'+(b[0]+12)+'" y="'+(b[1]+47)+'">'+st[i].label+'</text>'
+         + '<text class="mz-pop" x="'+(b[0]+12)+'" y="'+(b[1]+66)+'">'+fmt(z.p)+' people</text>';
+    });
+    s += '<text class="mz-sub" x="22" y="'+r1(riverY(22)-48)+'">River +'+L.toFixed(1)+' m</text>';
+    $("#chart-map").innerHTML = s;
+  }
+
+  function renderSafeRoute(){
+    var o = ZONES[OLD], L = sim.obs, st = sim.states[OLD];
+    var cut = L > o.re, flooded = L >= o.e, rec = sim.stage === "recede";
+    var COL = {safe:"#1F6B45", watch:"#E3B02A", ready:"#B84A0E", leave:"#B3261E", flooded:"#5B1A4A"};
+    var c = COL[st.s];
+    function riverY(x){ return 196 + 16*Math.sin((x-40)/640*Math.PI*2); }
+    var d = "", x;
+    for(x=-10; x<=650; x+=10){ d += (x===-10 ? "M" : "L") + x + "," + r1(riverY(x)) + " "; }
+    var by = r1(riverY(330));
+    var aCls = cut ? "route-cut" : ((flooded || rec) ? "route-idle" : "route-go");
+    var bCls = (cut && !flooded) ? "route-go" : "route-idle";
+    var house = '<polygon points="0,16 22,0 44,16" fill="var(--muted)"/><rect x="4" y="16" width="36" height="24" fill="var(--staff)" stroke="var(--ink)" stroke-width="1.5"/><rect x="18" y="26" width="8" height="14" fill="var(--road)"/>';
+    var s = '<g fill="none" stroke="var(--line)" stroke-width="1.5"><ellipse cx="505" cy="76" rx="100" ry="58"/><ellipse cx="505" cy="76" rx="68" ry="38"/><ellipse cx="505" cy="76" rx="36" ry="19"/></g>'
+      + '<rect x="40" y="34" width="170" height="100" rx="14" fill="'+c+'" fill-opacity=".2" stroke="'+c+'" stroke-width="3"/>'
+      + '<rect x="430" y="34" width="150" height="84" rx="14" fill="#1F6B45" fill-opacity=".2" stroke="#1F6B45" stroke-width="3"/>'
+      + '<path class="map-river" d="'+d+'" style="stroke-width:'+r1(26 + L*3.5)+'px"/>';
+    if(flooded){ s += '<rect x="40" y="34" width="170" height="100" rx="14" fill="var(--water)" fill-opacity=".45"/>'; }
+    s += '<path class="'+aCls+'" d="M210,112 L330,112 L330,262 Q330,306 374,306 L452,306"/>'
+      + '<path class="'+bCls+'" d="M210,64 C300,52 370,56 430,68"/>'
+      + '<rect class="bridge'+(cut ? ' cut-b' : '')+'" x="-34" y="-7" width="68" height="14" rx="3" transform="translate(330 '+by+') rotate(90)"/>';
+    if(cut){ s += '<circle cx="330" cy="'+by+'" r="11" fill="#B3261E"/><text class="mz-x" x="330" y="'+r1(riverY(330)+6)+'" text-anchor="middle">\u00d7</text>'; }
+    [[236,112,"1"],[330,150,"2"],[400,306,"3"]].forEach(function(m){
+      s += '<circle cx="'+m[0]+'" cy="'+m[1]+'" r="11" fill="var(--ink)"/><text class="rm-n" x="'+m[0]+'" y="'+(m[1]+5)+'" text-anchor="middle">'+m[2]+'</text>';
+    });
+    s += '<g transform="translate(452 284)">'+house+'</g><text class="mz-sub" x="474" y="338" text-anchor="middle">District Stadium</text>'
+      + '<g transform="translate(534 70)">'+house+'</g>'
+      + '<text class="mz-name" x="442" y="61">School Hill</text><text class="mz-sub" x="442" y="81">Safe</text><text class="mz-pop" x="442" y="100">Higher ground</text>'
+      + '<text class="mz-name" x="52" y="62">Old Town</text><text class="mz-sub" x="52" y="82">'+st.label+'</text>'
+      + '<circle cx="58" cy="108" r="6" fill="var(--ink)"/><text class="mz-sub" x="70" y="112">You are here</text>'
+      + '<text class="mz-pop" x="283" y="101" text-anchor="middle">Fort Rd</text>'
+      + '<text class="mz-pop" x="342" y="244">Ring Rd</text>'
+      + '<text class="mz-pop" x="320" y="40" text-anchor="middle">Fallback road to School Hill</text>'
+      + '<text class="mz-sub" x="14" y="'+r1(riverY(22) - (13 + L*1.75) - 8)+'">River +'+L.toFixed(1)+' m</text>';
+    $("#chart-route").innerHTML = s;
+    var txt = st.act;
+    if(!rec && (st.s === "safe" || st.s === "watch")){ txt = "Your route to District Stadium is open. " + st.act; }
+    $("#route-map-text").textContent = txt;
+  }
+
+  function renderRouting(){
+    var rows = "", routes = 0, openR = 0, L = sim.obs;
+    ZONES.forEach(function(z,i){
+      if(z.e > 8){
+        rows += '<tr><th scope="row">' + z.n + '</th><td colspan="5">Higher ground. No evacuation needed.</td></tr>';
+        return;
+      }
+      routes++;
+      var cutR = L > z.re;
+      if(!cutR) openR++;
+      var et = sim.etas[i], t = et ? et.t : null, fl = sim.floodT[z.n] !== undefined && L >= z.e;
+      function lt(helped){
+        if(fl) return "Flooded";
+        if(t === null) return "No order needed";
+        var x = t - need(z,helped);
+        if(x <= 0.25) return helped ? "Late. Send help now" : "Leave now";
+        return "Within " + half(x) + " h";
+      }
+      rows += '<tr><th scope="row">' + z.n + '</th><td>' + z.route + '<br>Shelter: ' + z.shelter + '</td><td>'
+        + (cutR ? '<span class="cut">Cut</span>' : 'Open') + '</td><td>' + WALK[z.n] + ' min</td><td>'
+        + lt(false) + '</td><td>' + lt(true) + '</td></tr>';
+    });
+    $("#ro-body").innerHTML = rows;
+    $("#route-text").textContent = openR + " of " + routes + " routes are open. The system works out each leave-by time from the latest forecast.";
+    return {routes:routes, openR:openR};
+  }
+
+  function renderShelters(){
+    var html = "", total = 0, ordered = 0;
+    SHELTERS.forEach(function(sh){
+      var assigned = 0, moving = 0, names = [];
+      ZONES.forEach(function(z,i){
+        if(z.shelter === sh.n){
+          assigned += z.p; names.push(shortName(z));
+          var s2 = sim.states[i].s;
+          if(s2 === "leave" || s2 === "flooded"){ moving += z.p; }
+        }
+      });
+      total += assigned; ordered += moving;
+      var pa = Math.min(100, assigned/sh.cap*100), pm = Math.min(100, moving/sh.cap*100);
+      html += '<div class="shelter"><div class="row"><span>' + sh.n + '</span><span>' + fmt(assigned) + ' of ' + fmt(sh.cap) + ' places assigned</span></div>'
+        + '<div class="cap" role="img" aria-label="' + fmt(assigned) + ' of ' + fmt(sh.cap) + ' places assigned, ' + fmt(moving) + ' people ordered to move"><span class="cap-assigned" style="width:' + pa + '%"></span><span class="cap-moving" style="width:' + pm + '%"></span></div>'
+        + '<small>For ' + names.join(" and ") + '. ' + fmt(moving) + ' people ordered to move so far.</small></div>';
+    });
+    $("#shelters").innerHTML = html;
+    $("#shelter-text").textContent = fmt(total) + " people are assigned across " + SHELTERS.length + " shelters. No shelter is over capacity.";
+    return ordered;
+  }
+
+  function renderScore(){
+    var sc = sim.score, now = sim.t;
+    var Lx = 52, R = 620, T = 16, B = 214, s = "";
+    function X(t){ return r1(Lx + (t/TMAX)*(R-Lx)); }
+    function Y(q){ return r1(B - (q/100)*(B-T)); }
+    [0,25,50,75,100].forEach(function(q){
+      s += '<line class="ch-grid" x1="'+Lx+'" x2="'+R+'" y1="'+Y(q)+'" y2="'+Y(q)+'"/>'
+         + '<text class="ch-t" x="'+(Lx-8)+'" y="'+(Y(q)+4)+'" text-anchor="end">'+q+'%</text>';
+    });
+    [0,8,16,24,32,40].forEach(function(v){
+      s += '<text class="ch-t" x="'+X(v)+'" y="'+(B+20)+'" text-anchor="middle">'+v+' h</text>';
+    });
+    s += '<text class="ch-t" x="'+((Lx+R)/2)+'" y="'+(B+42)+'" text-anchor="middle">Hours since monitoring began</text>';
+    var pts = "";
+    sim.scores.forEach(function(q){ pts += X(q.t)+","+Y(q.pct)+" "; });
+    s += '<polygon class="ch-band" points="'+pts+X(now)+','+B+' '+X(0)+','+B+'"/>'
+       + '<polyline class="ch-line" points="'+pts+'"/>'
+       + '<line class="ch-vline" x1="'+X(now)+'" y1="'+Y(sc.pct)+'" x2="'+X(now)+'" y2="'+B+'"/>'
+       + '<circle class="ch-mark" cx="'+X(now)+'" cy="'+Y(sc.pct)+'" r="6"/>';
+    var lx = X(now), tx, ty, anchor;
+    if(lx > R-110){ tx = lx-10; ty = Math.min(Y(sc.pct)+22, B-8); anchor = "end"; }
+    else { tx = lx+10; ty = Math.max(Y(sc.pct)-12, T+10); anchor = "start"; }
+    s += '<text class="ch-t-strong" x="'+tx+'" y="'+ty+'" text-anchor="'+anchor+'">'+Math.round(sc.pct)+'% now</text>';
+    $("#chart-score").innerHTML = s;
+
+    $("#score-big").textContent = Math.round(sc.pct) + "%";
+    var fg = $("#ring-fg");
+    fg.style.strokeDashoffset = (414.7 * (1 - sc.pct/100)).toFixed(1);
+    fg.style.stroke = sc.pct >= 80 ? "#1F6B45" : (sc.pct >= 50 ? "#E3B02A" : "#B3261E");
+
+    var leads = [];
+    ZONES.forEach(function(z){
+      if(sim.floodT[z.n] !== undefined && sim.orderT[z.n] !== undefined){
+        leads.push(shortName(z) + " " + r1(sim.floodT[z.n] - sim.orderT[z.n]) + " h");
+      }
+    });
+    $("#score-text").textContent = fmt(sc.safe) + " of " + fmt(sc.atRisk)
+      + " people in flood-prone zones can reach a shelter before their zone floods, based on the latest forecast and the orders already sent."
+      + (leads.length ? " Warning given before the water arrived: " + leads.join(", ") + "." : "");
+    return sc;
+  }
+
+  function renderInputs(ordered, rt){
+    var p = sim.p, L = sim.obs;
+    $("#v1").textContent = "+" + L.toFixed(1) + " m";
+    $("#v1s").textContent = (Math.abs(p.rate) < 0.03 ? "River gauge above normal and steady. " : "River gauge above normal, " + (p.rate > 0 ? "rising " : "falling ") + Math.abs(p.rate).toFixed(2) + " m an hour. ")
+      + Math.round(sim.rain24) + " mm of rain in the last 24 hours upstream.";
+    var cutN = rt.routes - rt.openR;
+    $("#v4").textContent = cutN + " of " + rt.routes + " routes cut";
+    var al = sim.alerts, newest = al.length ? al[al.length-1] : null;
+    $("#v5").textContent = al.length + (al.length === 1 ? " alert" : " alerts");
+    $("#v5s").textContent = newest ? "Latest: " + newest.text : "No alerts yet. The system is watching.";
+    $("#feed").innerHTML = al.length
+      ? al.slice(-8).reverse().map(function(a){ return "<li><strong>Hour " + a.t.toFixed(1) + "</strong>" + a.text + "</li>"; }).join("")
+      : "<li>No alerts yet.</li>";
+
+    var rows = "", move = 0, help = 0, zm = 0, nx = nextFlood();
+    ZONES.forEach(function(z,i){
+      var st = sim.states[i], et = sim.etas[i];
+      if(st.s === "leave" || st.s === "flooded"){ move += z.p; help += z.help; zm++; }
+      var arrives = z.e > 8 ? "Not expected" : (sim.obs >= z.e ? "Now" : etaText(et));
+      var routeCell = z.re < 99
+        ? z.route + '<br><span class="' + (L > z.re ? "cut" : "") + '">' + (L > z.re ? "Cut" : "Open") + '</span>'
+        : z.route;
+      rows += '<tr><th scope="row">' + z.n + '</th><td>' + z.e + ' m</td><td>' + fmt(z.p) + '</td>'
+        + '<td><span class="st" data-s="' + st.s + '">' + st.label + '</span></td>'
+        + '<td>' + arrives + '</td><td>' + routeCell + '</td><td>' + st.act + '</td></tr>';
+    });
+    $("#zone-body").innerHTML = rows;
+    $("#zone-summary").textContent = zm > 0
+      ? fmt(move) + " people in " + zm + (zm === 1 ? " zone need" : " zones need") + " to move now. " + fmt(help) + " of them need help to move."
+      : "No zone needs to move yet." + (nx ? " First to flood: " + nx.n + ", in about " + half(nx.t) + " h." : "");
+  }
+
+  function renderStrip(rt, ordered, sc){
+    var nx = nextFlood(), fl = 0, atRisk = 0;
+    ZONES.forEach(function(z,i){ if(z.e <= 8){ atRisk++; if(sim.states[i].s === "flooded") fl++; } });
+    $("#k1").textContent = nx ? "In about " + half(nx.t) + " h" : (fl > 0 ? "Flooding now" : "None expected");
+    $("#k1s").textContent = nx ? nx.n + " floods next" : (fl > 0 ? fl + (fl === 1 ? " zone is" : " zones are") + " under water" : "The river is normal");
+    $("#k2").textContent = atRisk + " zones at risk";
+    $("#k2s").textContent = fl + " flooded now";
+    $("#k3").textContent = rt.openR + " of " + rt.routes + " routes open";
+    $("#k3s").textContent = (rt.routes - rt.openR) === 0 ? "No road is cut yet" : (rt.routes - rt.openR) + " cut by water";
+    $("#k4").textContent = fmt(ordered) + " people";
+    $("#k4s").textContent = "ordered to move to " + SHELTERS.length + " shelters";
+    $("#k5").textContent = Math.round(sc.pct) + "%";
+    $("#k5s").textContent = fmt(sc.safe) + " of " + fmt(sc.atRisk) + " can reach shelter in time";
+  }
+
+  function renderPipeline(ordered){
+    var p = sim.p, nx = nextFlood(), orders = 0;
+    ZONES.forEach(function(z){ if(sim.orderT[z.n] !== undefined) orders++; });
+    $("#pp1").textContent = "+" + sim.obs.toFixed(1) + " m, " + Math.round(sim.rainNow) + " mm/h";
+    $("#pp2").textContent = (sim.rejected + sim.gaps === 0) ? "All readings valid" : sim.rejected + " rejected, " + sim.gaps + " filled";
+    $("#pp3").textContent = Math.abs(p.rate) < 0.02 ? "Steady" : (p.rate > 0 ? "+" : "") + p.rate.toFixed(2) + " m/h";
+    $("#pp4").textContent = nx ? nx.n + " in " + half(nx.t) + " h" : "No flood expected";
+    $("#pp5").textContent = orders + (orders === 1 ? " order sent" : " orders sent");
+  }
+
+  function renderAll(){
+    renderMonitor();
+    renderConsole();
+    renderPredict();
+    renderRisk();
+    renderMap();
+    renderSafeRoute();
+    var rt = renderRouting();
+    var ordered = renderShelters();
+    var sc = renderScore();
+    renderInputs(ordered, rt);
+    renderStrip(rt, ordered, sc);
+    renderPipeline(ordered);
+  }
+
+  /* ---------- Automatic loop ---------- */
+  function clearTimers(){
+    if(timer){ clearInterval(timer); timer = null; }
+    if(restartTimer){ clearTimeout(restartTimer); restartTimer = null; }
+  }
+  function restart(){
+    finished = false; lastStage = "";
+    resetSim(); renderAll();
+    if(!paused){ timer = setInterval(tick, TICK_MS); }
+  }
+  function tick(){
+    if(sim.i >= READ.length - 1){
+      clearTimers(); finished = true; renderMonitor();
+      restartTimer = setTimeout(restart, RESTART_MS);
+      return;
+    }
+    step(); renderAll();
+  }
+  $("#pause").addEventListener("click", function(){
+    paused = !paused;
+    $("#pause").textContent = paused ? "Resume updates" : "Pause updates";
+    clearTimers();
+    if(!paused){
+      if(finished){ restart(); } else { timer = setInterval(tick, TICK_MS); }
+    }
+    renderMonitor();
+  });
+  resetSim();
+  renderAll();
+  timer = setInterval(tick, TICK_MS);
+
+  /* ---------- Go-bag and personal plan (saved on this device only) ---------- */
+  var BAG = [
+    "Phone, charger and power bank",
+    "ID, property, insurance and bank papers in a waterproof bag, plus copies",
+    "Medicines for several days, and prescriptions",
+    "Drinking water and dry food for a day or two",
+    "Torch, spare batteries and a whistle",
+    "Cash in small notes",
+    "Dry clothes and a light rain jacket",
+    "Things for babies, older people or anyone who needs care",
+    "Pet food and a lead or carrier"
+  ];
+  var bagEl = $("#bag");
+  BAG.forEach(function(text, i){
+    var li = document.createElement("li");
+    var id = "bag-" + i;
+    li.innerHTML = '<label for="'+id+'"><input type="checkbox" id="'+id+'" data-save="bag'+i+'"><span></span></label>';
+    li.querySelector("span").textContent = text;
+    bagEl.appendChild(li);
+  });
+  var saved = document.querySelectorAll("[data-save]");
+  saved.forEach(function(el){
+    var key = "how-" + el.getAttribute("data-save");
+    var v = store.get(key);
+    if(v !== null){
+      if(el.type === "checkbox"){ el.checked = v === "1"; } else { el.value = v; }
+    }
+    el.addEventListener("input", function(){
+      store.set(key, el.type === "checkbox" ? (el.checked ? "1" : "0") : el.value);
+    });
+    el.addEventListener("change", function(){
+      if(el.type === "checkbox"){ store.set(key, el.checked ? "1" : "0"); }
+    });
+  });
+  $("#print").addEventListener("click", function(){ window.print(); });
+  $("#clear").addEventListener("click", function(){
+    if(!window.confirm("Clear the plan and checklist on this device?")) return;
+    saved.forEach(function(el){
+      store.del("how-" + el.getAttribute("data-save"));
+      if(el.type === "checkbox"){ el.checked = false; } else { el.value = ""; }
+    });
+  });
+})();
+
+</script>
+</body>
+</html>
